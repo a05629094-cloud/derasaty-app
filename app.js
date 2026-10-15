@@ -30,6 +30,14 @@ const cloud = cloudReady ? window.supabase.createClient(cloudConfig.url, cloudCo
 let currentUser = null;
 let cloudTimer;
 const $ = (selector) => document.querySelector(selector);
+const HERO_SCENE_KEY = 'derasaty-hero-scene-v1';
+function chooseHeroScene() {
+  const previous = Number(localStorage.getItem(HERO_SCENE_KEY));
+  const options = [0, 1, 2, 3].filter(scene => scene !== previous);
+  const scene = options[Math.floor(Math.random() * options.length)];
+  $('#heroArt').dataset.scene = String(scene);
+  localStorage.setItem(HERO_SCENE_KEY, String(scene));
+}
 const escapeHtml = (value) => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const subjectFor = id => data.subjects.find(subject => subject.id === id);
 const dayKey = date => { const d = new Date(date); d.setHours(0,0,0,0); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
@@ -38,16 +46,18 @@ function renderProfile(){
   data.profile=data.profile||{name:'طالب دراستي',stage:'',school:''};
   const name=(data.profile.name||'طالب دراستي').trim()||'طالب دراستي';
   const initial=[...name.trim()][0]||'ط';
-  $('#sidebarAvatar').textContent=initial;
+  const avatarData=data.profile.avatarData||'';
+  $('#sidebarAvatar').innerHTML=avatarData?`<img src="${avatarData}" alt="صورة ${escapeHtml(name)}">`:escapeHtml(initial);
   $('#sidebarProfileName').textContent=name;
   $('#sidebarProfileMeta').textContent=data.profile.stage||'أضف مرحلتك الدراسية';
-  $('#profileAvatar').textContent=initial;
+  $('#profileAvatar').innerHTML=avatarData?`<img src="${avatarData}" alt="صورة ${escapeHtml(name)}">`:escapeHtml(initial);
   $('#profileDisplayName').textContent=name;
   $('#heroGreeting').textContent='مرحبًا يا '+name+' 👋';
   $('#profileIntro').textContent=data.profile.stage?`رحلتك في ${data.profile.stage} تبدأ بخطوة كل يوم.`:'خصص ملفك الدراسي لتتابع رحلتك التعليمية.';
   $('#profileStageDisplay').textContent=data.profile.stage||'لم تُحدد بعد';
   $('#profileSchoolDisplay').textContent=data.profile.school||'لم تُضف بعد';
   $('#profileSyncNote').textContent=currentUser?'ملفك محفوظ مع حسابك ويظهر على أجهزتك بعد تسجيل الدخول.':cloudReady?'ملفك محفوظ على هذا الجهاز؛ سجّل الدخول لمزامنته مع أجهزتك.':'ملفك محفوظ على هذا الجهاز فقط.';
+  $('#welcomeTitle').textContent=`مرحبًا بك يا ${name} في دراستي`;
 }
 function render() {
   const pending = data.tasks.filter(task => !task.done).length;
@@ -115,7 +125,7 @@ async function loadCloudData(){
   const {data:row,error}=await cloud.from('user_data').select('data').eq('user_id',currentUser.id).maybeSingle();
   if(error){$('#syncStatus').textContent='تعذّر تحميل المزامنة. راجع إعداد قاعدة البيانات.';return;}
   if(row?.data){data={...structuredClone(seed),...row.data};localStorage.setItem(STORAGE_KEY,JSON.stringify(data));render();$('#syncStatus').textContent='تم تحميل بياناتك ومزامنتها.';}
-  else await syncNow();
+  else { data.profile=structuredClone(seed.profile); render(); await syncNow(); }
 }
 function scheduleCloudSave(){if(!cloud||!currentUser)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(syncNow,650);}
 async function syncNow(){
@@ -140,14 +150,33 @@ function openProfileDialog(){
   $('#profileNameInput').value=data.profile.name||'';
   $('#profileStageInput').value=data.profile.stage||'';
   $('#profileSchoolInput').value=data.profile.school||'';
+  $('#profileImageInput').value='';
+  $('#avatarFileHint').textContent=data.profile.avatarData?'الصورة الحالية محفوظة':'اختر صورة من جهازك';
+  pendingAvatarData=undefined;
   $('#profileDialog').showModal();
 }
+let pendingAvatarData;
+$('#profileImageInput').addEventListener('change',async event=>{
+  const file=event.target.files?.[0];
+  if(!file)return;
+  if(!file.type.startsWith('image/')){showToast('اختر ملف صورة');event.target.value='';return;}
+  try{
+    const bitmap=await createImageBitmap(file);
+    const size=256,scale=Math.min(size/bitmap.width,size/bitmap.height);
+    const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+    canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();
+    pendingAvatarData=canvas.toDataURL('image/jpeg',.78);
+    $('#avatarFileHint').textContent='تم اختيار الصورة';
+  }catch{showToast('لم نتمكن من فتح الصورة. جرّب صورة أخرى.');}
+});
+$('#removeProfileImage').addEventListener('click',()=>{pendingAvatarData='';$('#profileImageInput').value='';$('#avatarFileHint').textContent='ستظهر الحروف الأولى من اسمك';});
 $('#profileButton').addEventListener('click',openProfileDialog);
+$('#closeWelcome').addEventListener('click',()=>$('#welcomeDialog').close());
 $('#editProfileButton').addEventListener('click',openProfileDialog);
 $('#cancelProfileButton').addEventListener('click',()=>$('#profileDialog').close());
 $('#profileForm').addEventListener('submit',event=>{
   event.preventDefault();
-  data.profile={name:$('#profileNameInput').value.trim(),stage:$('#profileStageInput').value.trim(),school:$('#profileSchoolInput').value.trim()};
+  data.profile={name:$('#profileNameInput').value.trim(),stage:$('#profileStageInput').value.trim(),school:$('#profileSchoolInput').value.trim(),avatarData:pendingAvatarData===undefined?(data.profile.avatarData||''):pendingAvatarData};
   $('#profileDialog').close();
   save();
   showToast('تم حفظ ملفك الشخصي ✨');
@@ -205,3 +234,5 @@ if(localStorage.getItem(REMINDER_KEY)==='true'&&'Notification'in window&&Notific
 setInterval(checkStudyReminders,30000);
 initializeAccount();
 render();
+chooseHeroScene();
+$('#welcomeDialog').showModal();

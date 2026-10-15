@@ -1,4 +1,4 @@
-const CACHE_NAME='darasty-shell-v3';
+const CACHE_NAME='darasty-shell-v5';
 const APP_FILES=['./','./index.html','./style.css','./app.js','./supabase-config.js','./manifest.json','./darasty-192.png','./darasty-512.png'];
 
 self.addEventListener('install',event=>{
@@ -26,4 +26,6 @@ self.addEventListener('notificationclick',event=>{
     return open?open.focus():self.clients.openWindow('./');
   }));
 });
+
+
 

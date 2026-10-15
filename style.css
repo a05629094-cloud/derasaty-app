@@ -9,3 +9,27 @@
 .book{height:20px;z-index:2;box-shadow:0 5px 0 #152e28}.book-back{width:155px;left:34px;bottom:32px}.book-front{width:174px;left:16px;bottom:55px}.book-front i{height:18px}
 .plant{z-index:2;bottom:0;left:4px}.sparkle{z-index:2}
 @media(max-width:720px){.hero-art{width:220px;height:168px}}
+/* Per-open rotating study scenes */
+.hero-art[data-scene="1"]{background:linear-gradient(180deg,#9fc0c5 0 10%,#e8cfaa 10.5% 13%,#455c50 13.5% 100%)}
+.hero-art[data-scene="1"]:before{background:linear-gradient(90deg,transparent 47%,#ead9bd 48% 52%,transparent 53%),linear-gradient(0deg,transparent 47%,#ead9bd 48% 52%,transparent 53%),linear-gradient(145deg,#b9d8d1,#e9dcad 55%,#829b79)}
+.hero-art[data-scene="1"] .sun{background:#fff0bd;right:28px;left:auto;top:20px}
+.hero-art[data-scene="1"] .book-front{background:#5482bc}.hero-art[data-scene="1"] .book-back{background:#54a78c}
+.hero-art[data-scene="2"]{background:linear-gradient(180deg,#36445d 0 10%,#c59561 10.5% 13%,#202f35 13.5% 100%)}
+.hero-art[data-scene="2"]:before{background:linear-gradient(90deg,transparent 47%,#d7c7ae 48% 52%,transparent 53%),linear-gradient(0deg,transparent 47%,#d7c7ae 48% 52%,transparent 53%),linear-gradient(145deg,#51617a,#d1a16d 55%,#576b59)}
+.hero-art[data-scene="2"] .sun{background:#f6d58d;left:34px;right:auto;top:32px;width:38px;height:38px}
+.hero-art[data-scene="2"] .book-front{background:#b77456}.hero-art[data-scene="2"] .book-back{background:#385d54}
+.hero-art[data-scene="3"]{background:linear-gradient(180deg,#c19a6b 0 8%,#604b3d 8.5% 12%,#30463b 12.5% 100%)}
+.hero-art[data-scene="3"]:before{background:linear-gradient(90deg,transparent 47%,#ead9bd 48% 52%,transparent 53%),linear-gradient(0deg,transparent 47%,#ead9bd 48% 52%,transparent 53%),linear-gradient(145deg,#e7bd84,#b98b62 55%,#83916b)}
+.hero-art[data-scene="3"] .sun{background:#f9e2ae;left:45px;right:auto;top:26px;width:34px;height:34px}
+.hero-art[data-scene="3"] .book-front{background:#3c78ab}.hero-art[data-scene="3"] .book-back{background:#39a18b}
+#sidebarAvatar img,.profile-avatar-large img{width:100%;height:100%;display:block;object-fit:cover;border-radius:inherit}
+.avatar-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-7px 0 8px;color:var(--muted);font-size:9px}
+#profileForm input[type="file"]{font-size:11px;min-height:42px;padding:7px}
+.welcome-dialog{position:fixed;inset:50% auto auto 50%;transform:translate(-50%,-50%);margin:0;overflow:visible;width:min(390px,calc(100% - 34px));padding:36px 25px 22px;text-align:center;border:1px solid #e9e2d6;border-radius:25px;background:radial-gradient(circle at 50% 0,#f5e5c5 0,transparent 42%),#fffdf8;box-shadow:0 22px 75px #1c302b45}
+.welcome-dialog::backdrop{background:#182a2580;backdrop-filter:blur(4px)}
+.welcome-dialog .eyebrow{color:#8b9a8b;font-size:11px}
+.welcome-dialog h2{margin:8px 0 20px;color:var(--forest-dark);font-size:22px;line-height:1.7}
+.welcome-decoration{display:grid;place-items:center;width:54px;height:54px;margin:0 auto 12px;border-radius:18px;background:#e5eee6;color:var(--forest);font-size:26px}
+.welcome-author{border-top:1px solid var(--line);padding-top:15px;margin:0;color:#858d83;font-size:11px;line-height:1.9}
+.welcome-author strong{color:var(--forest);font-size:13px}
+.welcome-close{position:absolute;top:10px;left:11px;width:33px;height:33px;display:grid;place-items:center;border:0;border-radius:50%;background:#f0ede5;color:#627068;font-size:23px;cursor:pointer}
