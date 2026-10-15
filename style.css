@@ -33,3 +33,16 @@
 .welcome-author{border-top:1px solid var(--line);padding-top:15px;margin:0;color:#858d83;font-size:11px;line-height:1.9}
 .welcome-author strong{color:var(--forest);font-size:13px}
 .welcome-close{position:absolute;top:10px;left:11px;width:33px;height:33px;display:grid;place-items:center;border:0;border-radius:50%;background:#f0ede5;color:#627068;font-size:23px;cursor:pointer}
+/* Make each welcome scene visibly distinct across the whole banner */
+.hero[data-scene="0"]{background:radial-gradient(ellipse at 77% 18%,#d7a76c66,transparent 38%),linear-gradient(110deg,#183a32 0%,#244c40 55%,#3a5b4b 100%)}
+.hero[data-scene="1"]{background:radial-gradient(ellipse at 78% 16%,#f4c97877,transparent 38%),linear-gradient(110deg,#553a34 0%,#8a5940 55%,#b27b52 100%)}
+.hero[data-scene="2"]{background:radial-gradient(ellipse at 78% 16%,#aad7d788,transparent 38%),linear-gradient(110deg,#15324b 0%,#28576d 55%,#4c7a7b 100%)}
+.hero[data-scene="3"]{background:radial-gradient(ellipse at 78% 16%,#f1bf8b77,transparent 38%),linear-gradient(110deg,#493b4e 0%,#765364 55%,#a27567 100%)}
+.profile-image-picker{display:flex;align-items:center;gap:14px;padding:10px 12px;background:#f7f4ed;border:1px solid #ece6da;border-radius:14px;margin:8px 0 13px}
+.profile-image-preview{width:58px;height:58px;flex:0 0 58px;display:grid;place-items:center;overflow:hidden;border-radius:18px;background:#e5eee6;color:var(--forest);font-size:22px;font-weight:800}
+.profile-image-preview img{width:100%;height:100%;object-fit:cover}
+.profile-image-controls{flex:1;min-width:0}
+.profile-image-controls label{display:block;font-weight:700;font-size:10px}
+#profileImageInput{display:block;width:100%;max-width:100%;margin-top:6px;font:10px 'Cairo',Tahoma,sans-serif}
+#profileImageInput::file-selector-button{border:0;border-radius:8px;background:#e5eee6;color:var(--forest);padding:7px 10px;margin-inline-end:7px;font:700 10px 'Cairo',Tahoma,sans-serif;cursor:pointer}
+.avatar-actions{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:4px;color:var(--muted);font-size:9px}

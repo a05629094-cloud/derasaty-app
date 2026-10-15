@@ -36,6 +36,7 @@ function chooseHeroScene() {
   const options = [0, 1, 2, 3].filter(scene => scene !== previous);
   const scene = options[Math.floor(Math.random() * options.length)];
   $('#heroArt').dataset.scene = String(scene);
+  $('#heroPanel').dataset.scene = String(scene);
   localStorage.setItem(HERO_SCENE_KEY, String(scene));
 }
 const escapeHtml = (value) => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -153,23 +154,38 @@ function openProfileDialog(){
   $('#profileImageInput').value='';
   $('#avatarFileHint').textContent=data.profile.avatarData?'الصورة الحالية محفوظة':'اختر صورة من جهازك';
   pendingAvatarData=undefined;
+  showProfileImagePreview(data.profile.avatarData||'');
   $('#profileDialog').showModal();
 }
 let pendingAvatarData;
+function showProfileImagePreview(imageData){
+  const preview=$('#profileImagePreview');
+  if(imageData){preview.innerHTML=`<img src="${imageData}" alt="معاينة صورة الملف الشخصي">`;return;}
+  const name=$('#profileNameInput').value.trim()||'طالب دراستي';
+  preview.textContent=[...name][0]||'ط';
+}
+async function resizeAvatarImage(file){
+  let image;
+  if('createImageBitmap'in window) image=await createImageBitmap(file);
+  else image=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=()=>reject(new Error('read'));reader.onload=()=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('image'));img.src=reader.result;};reader.readAsDataURL(file);});
+  const width=image.width||image.naturalWidth,height=image.height||image.naturalHeight;
+  const scale=Math.min(256/width,256/height),canvas=document.createElement('canvas');
+  canvas.width=Math.max(1,Math.round(width*scale));canvas.height=Math.max(1,Math.round(height*scale));
+  const context=canvas.getContext('2d');if(!context)throw new Error('canvas');
+  context.drawImage(image,0,0,canvas.width,canvas.height);image.close?.();
+  return canvas.toDataURL('image/jpeg',.78);
+}
 $('#profileImageInput').addEventListener('change',async event=>{
   const file=event.target.files?.[0];
   if(!file)return;
   if(!file.type.startsWith('image/')){showToast('اختر ملف صورة');event.target.value='';return;}
   try{
-    const bitmap=await createImageBitmap(file);
-    const size=256,scale=Math.min(size/bitmap.width,size/bitmap.height);
-    const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
-    canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();
-    pendingAvatarData=canvas.toDataURL('image/jpeg',.78);
+    pendingAvatarData=await resizeAvatarImage(file);
+    showProfileImagePreview(pendingAvatarData);
     $('#avatarFileHint').textContent='تم اختيار الصورة';
-  }catch{showToast('لم نتمكن من فتح الصورة. جرّب صورة أخرى.');}
+  }catch{showToast('تعذّر فتح الصورة. جرّب صورة بصيغة JPG أو PNG.');}
 });
-$('#removeProfileImage').addEventListener('click',()=>{pendingAvatarData='';$('#profileImageInput').value='';$('#avatarFileHint').textContent='ستظهر الحروف الأولى من اسمك';});
+$('#removeProfileImage').addEventListener('click',()=>{pendingAvatarData='';$('#profileImageInput').value='';$('#avatarFileHint').textContent='ستظهر الحروف الأولى من اسمك';showProfileImagePreview('');});
 $('#profileButton').addEventListener('click',openProfileDialog);
 $('#closeWelcome').addEventListener('click',()=>$('#welcomeDialog').close());
 $('#editProfileButton').addEventListener('click',openProfileDialog);
@@ -236,3 +252,4 @@ initializeAccount();
 render();
 chooseHeroScene();
 $('#welcomeDialog').showModal();
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')chooseHeroScene();});
