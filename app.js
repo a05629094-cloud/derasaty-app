@@ -130,6 +130,21 @@ async function accountAction(kind){
 }
 $('#signInButton').addEventListener('click',()=>accountAction('signin'));
 $('#signUpButton').addEventListener('click',()=>accountAction('signup'));
+const resendButton=document.createElement('button');
+resendButton.type='button';
+resendButton.className='text-button';
+resendButton.textContent='إعادة إرسال رسالة التأكيد';
+resendButton.addEventListener('click',async()=>{
+  if(!cloud){setAuthMessage('إعداد قاعدة المزامنة لم يكتمل بعد.',true);return;}
+  const email=$('#accountEmail').value.trim();
+  if(!email){setAuthMessage('اكتب بريدك الإلكتروني أولًا.',true);return;}
+  setAuthMessage('جارٍ إرسال رسالة التأكيد…');
+  const redirectUrl=new URL('./',window.location.href).href;
+  const {error}=await cloud.auth.resend({type:'signup',email,options:{emailRedirectTo:redirectUrl}});
+  if(error){setAuthMessage(error.message,true);return;}
+  setAuthMessage('طلبنا إرسال رسالة جديدة. افحص الوارد ومجلد الرسائل غير المرغوب فيها.');
+});
+$('#signUpButton').parentElement.after(resendButton);
 $('#signOutButton').addEventListener('click',async()=>{if(cloud){await cloud.auth.signOut();currentUser=null;updateAccountUi();setAuthMessage('تم تسجيل الخروج. بيانات هذا الجهاز باقية محفوظة محليًا.');}});
 
 function parseSessionTime(value){const match=String(value||'').match(/^(\d{1,2}):(\d{2})\s*(ص|م)?$/);if(!match)return null;let hour=Number(match[1])%12;if(match[3]==='م')hour+=12;return {hour,minute:Number(match[2])};}
