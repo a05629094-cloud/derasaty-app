@@ -1,4 +1,6 @@
 const STORAGE_KEY = 'derasaty-data-v1';
+const REMINDER_KEY = 'derasaty-reminders-enabled';
+const LAST_REMINDER_KEY = 'derasaty-last-reminder';
 const seed = {
   subjects: [
     {id:'math', name:'الرياضيات', icon:'∑', color:'#eee8f7', detail:'تدريب وفهم'},
@@ -21,11 +23,16 @@ const seed = {
 let data;
 try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || structuredClone(seed); }
 catch { data = structuredClone(seed); }
+const cloudConfig = window.DARASTY_SUPABASE || {};
+const cloudReady = Boolean(cloudConfig.url && cloudConfig.publishableKey && window.supabase?.createClient);
+const cloud = cloudReady ? window.supabase.createClient(cloudConfig.url, cloudConfig.publishableKey) : null;
+let currentUser = null;
+let cloudTimer;
 const $ = (selector) => document.querySelector(selector);
 const escapeHtml = (value) => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const subjectFor = id => data.subjects.find(subject => subject.id === id);
 const dayKey = date => { const d = new Date(date); d.setHours(0,0,0,0); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
-function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); render(); }
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); render(); scheduleCloudSave(); }
 function render() {
   const pending = data.tasks.filter(task => !task.done).length;
   const totalMinutes = data.sessions.reduce((sum, session) => sum + Number(session.duration || 0), 0);
@@ -76,4 +83,73 @@ $('#entryForm').addEventListener('submit',event=>{event.preventDefault();const n
 $('#addTask').addEventListener('click',()=>openForm('task'));$('#quickAdd').addEventListener('click',()=>openForm('task'));$('#addSubject').addEventListener('click',()=>openForm('subject'));$('#addSession').addEventListener('click',()=>openForm('session'));
 document.querySelectorAll('[data-view]').forEach(link=>link.addEventListener('click',()=>{document.querySelectorAll('.nav-link').forEach(item=>item.classList.toggle('active',item.dataset.view===link.dataset.view));}));
 let toastTimer;function showToast(message){const toast=$('#toast');toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2200);}
+
+function setAuthMessage(message, isError=false){const el=$('#authMessage');el.textContent=message;el.classList.toggle('error',isError);}
+function updateAccountUi(){
+  $('#accountButtonText').textContent=currentUser ? (currentUser.email || 'حسابي') : 'تسجيل الدخول والمزامنة';
+  $('#signOutButton').hidden=!currentUser;
+  $('#syncStatus').textContent=!cloudReady ? 'المزامنة تحتاج إعداد Supabase مرة واحدة.' : currentUser ? 'الحساب متصل. تتم مزامنة التغييرات تلقائيًا.' : 'سجّل الدخول بنفس الحساب على أجهزتك لمزامنة بياناتك.';
+}
+async function loadCloudData(){
+  if(!cloud||!currentUser)return;
+  $('#syncStatus').textContent='جارٍ تحميل بيانات حسابك…';
+  const {data:row,error}=await cloud.from('user_data').select('data').eq('user_id',currentUser.id).maybeSingle();
+  if(error){$('#syncStatus').textContent='تعذّر تحميل المزامنة. راجع إعداد قاعدة البيانات.';return;}
+  if(row?.data){data={...structuredClone(seed),...row.data};localStorage.setItem(STORAGE_KEY,JSON.stringify(data));render();$('#syncStatus').textContent='تم تحميل بياناتك ومزامنتها.';}
+  else await syncNow();
+}
+function scheduleCloudSave(){if(!cloud||!currentUser)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(syncNow,650);}
+async function syncNow(){
+  if(!cloud||!currentUser)return;
+  $('#syncStatus').textContent='جارٍ حفظ التغييرات…';
+  const {error}=await cloud.from('user_data').upsert({user_id:currentUser.id,data,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  $('#syncStatus').textContent=error?'تعذّر الحفظ على السحابة. بياناتك محفوظة على هذا الجهاز.':'تمت المزامنة الآن.';
+}
+async function initializeAccount(){
+  updateAccountUi();
+  if(!cloud)return;
+  const {data:sessionData}=await cloud.auth.getSession();
+  currentUser=sessionData.session?.user||null;updateAccountUi();
+  if(currentUser)loadCloudData();
+  cloud.auth.onAuthStateChange((event,session)=>{
+    const nextUser=session?.user||null;
+    if(nextUser?.id!==currentUser?.id){currentUser=nextUser;updateAccountUi();if(currentUser)loadCloudData();}
+  });
+}
+$('#accountButton').addEventListener('click',()=>{$('#accountDialog').showModal();setAuthMessage('');});
+async function accountAction(kind){
+  if(!cloud){setAuthMessage('إعداد قاعدة المزامنة لم يكتمل بعد. اتبع خطوات ملف الإعداد المرفق.',true);return;}
+  const email=$('#accountEmail').value.trim(),password=$('#accountPassword').value;
+  if(!email||password.length<6){setAuthMessage('اكتب بريدًا صحيحًا وكلمة مرور من 6 أحرف على الأقل.',true);return;}
+  setAuthMessage(kind==='signup'?'جارٍ إنشاء الحساب…':'جارٍ تسجيل الدخول…');
+  const result=kind==='signup'?await cloud.auth.signUp({email,password}):await cloud.auth.signInWithPassword({email,password});
+  if(result.error){setAuthMessage(result.error.message==='Invalid login credentials'?'البريد أو كلمة المرور غير صحيحة.':result.error.message,true);return;}
+  if(kind==='signup'&&!result.data.session){setAuthMessage('تم إنشاء الحساب. افتح رسالة التأكيد التي وصلتك إلى بريدك، ثم سجّل الدخول.');return;}
+  setAuthMessage('تم تسجيل الدخول. جارٍ مزامنة بياناتك…');
+}
+$('#signInButton').addEventListener('click',()=>accountAction('signin'));
+$('#signUpButton').addEventListener('click',()=>accountAction('signup'));
+$('#signOutButton').addEventListener('click',async()=>{if(cloud){await cloud.auth.signOut();currentUser=null;updateAccountUi();setAuthMessage('تم تسجيل الخروج. بيانات هذا الجهاز باقية محفوظة محليًا.');}});
+
+function parseSessionTime(value){const match=String(value||'').match(/^(\d{1,2}):(\d{2})\s*(ص|م)?$/);if(!match)return null;let hour=Number(match[1])%12;if(match[3]==='م')hour+=12;return {hour,minute:Number(match[2])};}
+const notificationWorkerReady=('serviceWorker'in navigator)?navigator.serviceWorker.register('./service-worker.js').then(()=>navigator.serviceWorker.ready).catch(()=>null):Promise.resolve(null);
+function checkStudyReminders(){
+  if(localStorage.getItem(REMINDER_KEY)!=='true'||Notification.permission!=='granted')return;
+  const now=new Date(),today=dayKey(now);
+  for(const session of data.sessions){const time=parseSessionTime(session.time);if(!time||time.hour!==now.getHours()||time.minute!==now.getMinutes())continue;
+    const token=`${today}:${session.id}`;if(localStorage.getItem(LAST_REMINDER_KEY)===token)continue;
+    localStorage.setItem(LAST_REMINDER_KEY,token);
+    notificationWorkerReady.then(registration=>{if(registration)registration.showNotification('موعد المذاكرة — دراستي',{body:session.title,icon:'./darasty-192.png',badge:'./darasty-192.png',tag:token});else if('Notification'in window)new Notification('موعد المذاكرة — دراستي',{body:session.title,icon:'./darasty-192.png'});});
+  }
+}
+$('#reminderButton').addEventListener('click',async()=>{
+  if(!('Notification'in window)){showToast('المتصفح لا يدعم تنبيهات المواقع');return;}
+  if(localStorage.getItem(REMINDER_KEY)==='true'){localStorage.setItem(REMINDER_KEY,'false');$('#reminderButton').innerHTML='🔔 <span>تفعيل التنبيهات</span>';showToast('تم إيقاف التنبيهات');return;}
+  const permission=await Notification.requestPermission();
+  if(permission==='granted'){localStorage.setItem(REMINDER_KEY,'true');$('#reminderButton').innerHTML='🔕 <span>إيقاف التنبيهات</span>';showToast('ستصلك التنبيهات أثناء فتح الموقع');checkStudyReminders();}
+  else showToast('اسمح بالإشعارات من إعدادات المتصفح');
+});
+if(localStorage.getItem(REMINDER_KEY)==='true'&&'Notification'in window&&Notification.permission==='granted')$('#reminderButton').innerHTML='🔕 <span>إيقاف التنبيهات</span>';
+setInterval(checkStudyReminders,30000);
+initializeAccount();
 render();

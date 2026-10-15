@@ -26,7 +26,7 @@
     </aside>
 
     <main id="home" class="main-content">
-      <header class="topbar"><div><p class="eyebrow" id="todayLabel">يوم جميل للدراسة</p><h1>أهلًا بك في دراستي <span>👋</span></h1></div><button class="icon-button" id="quickAdd" aria-label="إضافة مهمة">＋</button></header>
+      <header class="topbar"><div><p class="eyebrow" id="todayLabel">يوم جميل للدراسة</p><h1>أهلًا بك في دراستي <span>👋</span></h1></div><div class="topbar-actions"><button class="header-action" id="reminderButton" type="button">🔔 <span>تفعيل التنبيهات</span></button><button class="header-action" id="accountButton" type="button">👤 <span id="accountButtonText">تسجيل الدخول والمزامنة</span></button><button class="icon-button" id="quickAdd" aria-label="إضافة مهمة">＋</button></div></header>
 
       <section class="hero card"><div><span class="hero-tag">مساحتك لتنظيم الدراسة</span><h2>كل إنجاز كبير<br>يبدأ بخطوة صغيرة.</h2><p>رتّب يومك، أنجز مهامك، وشاهد تقدمك خطوة بخطوة.</p><a class="button button-light" href="#tasks" data-view="tasks">ابدأ إنجازك <span>←</span></a></div><div class="hero-art" aria-hidden="true"><div class="sun"></div><div class="book book-back"></div><div class="book book-front"><i></i><i></i><i></i></div><div class="sparkle">✦</div><div class="plant">✿</div></div></section>
 
@@ -50,8 +50,11 @@
     </main>
   </div>
 
+  <dialog id="accountDialog"><form method="dialog" id="accountForm"><div class="dialog-header"><div><p class="eyebrow">حساب دراستي</p><h2>دخول ومزامنة</h2></div><button class="close-button" value="cancel" aria-label="إغلاق">×</button></div><p class="account-copy">أنشئ حسابًا أو سجّل الدخول بنفس البريد على أجهزتك لمزامنة مهامك وموادك.</p><label>البريد الإلكتروني<input id="accountEmail" type="email" autocomplete="email" required placeholder="name@example.com"></label><label>كلمة المرور<input id="accountPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="6 أحرف على الأقل"></label><p id="authMessage" class="auth-message" role="status"></p><div class="dialog-actions"><button class="button button-primary" id="signInButton" type="button">تسجيل الدخول</button><button class="button button-plain" id="signUpButton" type="button">إنشاء حساب</button></div><button class="text-button signout-button" id="signOutButton" type="button" hidden>تسجيل الخروج</button><p id="syncStatus" class="sync-status">الحفظ على هذا الجهاز فقط إلى أن يتم إعداد المزامنة.</p></form></dialog>
   <dialog id="formDialog"><form method="dialog" id="entryForm"><div class="dialog-header"><div><p class="eyebrow" id="formEyebrow">خطوة جديدة</p><h2 id="formTitle">أضف مهمة</h2></div><button class="close-button" value="cancel" aria-label="إغلاق">×</button></div><label id="nameLabel">اسم المهمة<input id="entryName" required maxlength="60" placeholder="مثال: مراجعة درس الكسور"></label><label id="detailLabel">المادة<select id="entrySubject"></select></label><label id="timeLabel" hidden>الوقت<input id="entryTime" type="time" value="16:00"></label><label id="durationLabel" hidden>مدة الجلسة بالدقائق<input id="entryDuration" type="number" min="10" max="240" value="30"></label><div class="dialog-actions"><button class="button button-primary" id="saveEntry" value="default">حفظ</button><button class="button button-plain" value="cancel">إلغاء</button></div></form></dialog>
   <div id="toast" role="status" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
