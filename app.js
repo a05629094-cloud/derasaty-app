@@ -122,7 +122,8 @@ async function accountAction(kind){
   const email=$('#accountEmail').value.trim(),password=$('#accountPassword').value;
   if(!email||password.length<6){setAuthMessage('اكتب بريدًا صحيحًا وكلمة مرور من 6 أحرف على الأقل.',true);return;}
   setAuthMessage(kind==='signup'?'جارٍ إنشاء الحساب…':'جارٍ تسجيل الدخول…');
-  const result=kind==='signup'?await cloud.auth.signUp({email,password}):await cloud.auth.signInWithPassword({email,password});
+  const redirectUrl=new URL('./',window.location.href).href;
+  const result=kind==='signup'?await cloud.auth.signUp({email,password,options:{emailRedirectTo:redirectUrl}}):await cloud.auth.signInWithPassword({email,password});
   if(result.error){setAuthMessage(result.error.message==='Invalid login credentials'?'البريد أو كلمة المرور غير صحيحة.':result.error.message,true);return;}
   if(kind==='signup'&&!result.data.session){setAuthMessage('تم إنشاء الحساب. افتح رسالة التأكيد التي وصلتك إلى بريدك، ثم سجّل الدخول.');return;}
   setAuthMessage('تم تسجيل الدخول. جارٍ مزامنة بياناتك…');
