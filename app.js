@@ -18,7 +18,8 @@ const seed = {
     {id:'s2', time:'05:00 م', title:'قراءة اللغة العربية', duration:30, subject:'arabic'},
     {id:'s3', time:'06:00 م', title:'مراجعة العلوم', duration:35, subject:'science'}
   ],
-  week: {}
+  week: {},
+  profile: {name:'طالب دراستي', stage:'', school:''}
 };
 let data;
 try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || structuredClone(seed); }
@@ -33,6 +34,21 @@ const escapeHtml = (value) => String(value).replace(/[&<>"']/g, c => ({'&':'&amp
 const subjectFor = id => data.subjects.find(subject => subject.id === id);
 const dayKey = date => { const d = new Date(date); d.setHours(0,0,0,0); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); render(); scheduleCloudSave(); }
+function renderProfile(){
+  data.profile=data.profile||{name:'طالب دراستي',stage:'',school:''};
+  const name=(data.profile.name||'طالب دراستي').trim()||'طالب دراستي';
+  const initial=[...name.trim()][0]||'ط';
+  $('#sidebarAvatar').textContent=initial;
+  $('#sidebarProfileName').textContent=name;
+  $('#sidebarProfileMeta').textContent=data.profile.stage||'أضف مرحلتك الدراسية';
+  $('#profileAvatar').textContent=initial;
+  $('#profileDisplayName').textContent=name;
+  $('#heroGreeting').textContent='مرحبًا يا '+name+' 👋';
+  $('#profileIntro').textContent=data.profile.stage?`رحلتك في ${data.profile.stage} تبدأ بخطوة كل يوم.`:'خصص ملفك الدراسي لتتابع رحلتك التعليمية.';
+  $('#profileStageDisplay').textContent=data.profile.stage||'لم تُحدد بعد';
+  $('#profileSchoolDisplay').textContent=data.profile.school||'لم تُضف بعد';
+  $('#profileSyncNote').textContent=currentUser?'ملفك محفوظ مع حسابك ويظهر على أجهزتك بعد تسجيل الدخول.':cloudReady?'ملفك محفوظ على هذا الجهاز؛ سجّل الدخول لمزامنته مع أجهزتك.':'ملفك محفوظ على هذا الجهاز فقط.';
+}
 function render() {
   const pending = data.tasks.filter(task => !task.done).length;
   const totalMinutes = data.sessions.reduce((sum, session) => sum + Number(session.duration || 0), 0);
@@ -64,6 +80,7 @@ function render() {
   const dayNames=['ن','ث','ر','خ','ج','س','ح']; const week=$('#weekDays'); week.replaceChildren();
   dayNames.forEach((name,index)=>{const date=new Date(currentMonday);date.setDate(currentMonday.getDate()+index);const el=document.createElement('div');el.className=`week-day${date.toDateString()===new Date().toDateString()?' today':''}`;el.innerHTML=`${name}<i>${data.week[dayKey(date)]||0}</i>`;week.append(el);});
   const today=new Intl.DateTimeFormat('ar-EG',{weekday:'long',day:'numeric',month:'long'}).format(new Date()); $('#todayLabel').textContent=today;
+  renderProfile();
 }
 
 const dialog=$('#formDialog'); let mode='task';
@@ -81,6 +98,7 @@ $('#entryForm').addEventListener('submit',event=>{event.preventDefault();const n
   dialog.close();save();showToast('تمت الإضافة بنجاح ✨');
 });
 $('#addTask').addEventListener('click',()=>openForm('task'));$('#quickAdd').addEventListener('click',()=>openForm('task'));$('#addSubject').addEventListener('click',()=>openForm('subject'));$('#addSession').addEventListener('click',()=>openForm('session'));
+$('#navQuickAdd').addEventListener('click',()=>openForm('task'));
 document.querySelectorAll('[data-view]').forEach(link=>link.addEventListener('click',()=>{document.querySelectorAll('.nav-link').forEach(item=>item.classList.toggle('active',item.dataset.view===link.dataset.view));}));
 let toastTimer;function showToast(message){const toast=$('#toast');toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2200);}
 
@@ -88,6 +106,7 @@ function setAuthMessage(message, isError=false){const el=$('#authMessage');el.te
 function updateAccountUi(){
   $('#accountButtonText').textContent=currentUser ? (currentUser.email || 'حسابي') : 'تسجيل الدخول والمزامنة';
   $('#signOutButton').hidden=!currentUser;
+  renderProfile();
   $('#syncStatus').textContent=!cloudReady ? 'المزامنة تحتاج إعداد Supabase مرة واحدة.' : currentUser ? 'الحساب متصل. تتم مزامنة التغييرات تلقائيًا.' : 'سجّل الدخول بنفس الحساب على أجهزتك لمزامنة بياناتك.';
 }
 async function loadCloudData(){
@@ -116,6 +135,23 @@ async function initializeAccount(){
     if(nextUser?.id!==currentUser?.id){currentUser=nextUser;updateAccountUi();if(currentUser)loadCloudData();}
   });
 }
+function openProfileDialog(){
+  data.profile=data.profile||{name:'طالب دراستي',stage:'',school:''};
+  $('#profileNameInput').value=data.profile.name||'';
+  $('#profileStageInput').value=data.profile.stage||'';
+  $('#profileSchoolInput').value=data.profile.school||'';
+  $('#profileDialog').showModal();
+}
+$('#profileButton').addEventListener('click',openProfileDialog);
+$('#editProfileButton').addEventListener('click',openProfileDialog);
+$('#cancelProfileButton').addEventListener('click',()=>$('#profileDialog').close());
+$('#profileForm').addEventListener('submit',event=>{
+  event.preventDefault();
+  data.profile={name:$('#profileNameInput').value.trim(),stage:$('#profileStageInput').value.trim(),school:$('#profileSchoolInput').value.trim()};
+  $('#profileDialog').close();
+  save();
+  showToast('تم حفظ ملفك الشخصي ✨');
+});
 $('#accountButton').addEventListener('click',()=>{$('#accountDialog').showModal();setAuthMessage('');});
 async function accountAction(kind){
   if(!cloud){setAuthMessage('إعداد قاعدة المزامنة لم يكتمل بعد. اتبع خطوات ملف الإعداد المرفق.',true);return;}

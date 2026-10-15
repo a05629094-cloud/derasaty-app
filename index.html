@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#102764">
+  <meta name="theme-color" content="#244f43">
   <title>دراستي | خطتك تبدأ اليوم</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="./darasty-192.png">
@@ -17,18 +17,20 @@
       <nav aria-label="القائمة الرئيسية">
         <a class="nav-link active" href="#home" data-view="home"><span>⌂</span> الرئيسية</a>
         <a class="nav-link" href="#subjects" data-view="subjects"><span>▤</span> المواد</a>
+        <button class="nav-add" id="navQuickAdd" type="button" aria-label="إضافة مهمة">＋</button>
         <a class="nav-link" href="#tasks" data-view="tasks"><span>☑</span> المهام</a>
         <a class="nav-link" href="#schedule" data-view="schedule"><span>◷</span> جدول اليوم</a>
         <a class="nav-link" href="#progress" data-view="progress"><span>↗</span> تقدمي</a>
+        <a class="nav-link" href="#profile" data-view="profile"><span>♙</span> ملفي الشخصي</a>
       </nav>
       <div class="sidebar-note"><span>🌱</span><strong>خطوة صغيرة كل يوم</strong><p>تذكّر: الاستمرار أهم من الكمال.</p></div>
-      <div class="profile"><div class="avatar">م</div><div><strong>مساء الخير!</strong><small>طالب مجتهد</small></div></div>
+      <button class="profile profile-trigger" id="profileButton" type="button"><span class="avatar" id="sidebarAvatar">ط</span><span class="profile-trigger-copy"><strong id="sidebarProfileName">ملفي الشخصي</strong><small id="sidebarProfileMeta">أضف بياناتك</small></span><span class="profile-arrow">‹</span></button>
     </aside>
 
     <main id="home" class="main-content">
-      <header class="topbar"><div><p class="eyebrow" id="todayLabel">يوم جميل للدراسة</p><h1>أهلًا بك في دراستي <span>👋</span></h1></div><div class="topbar-actions"><button class="header-action" id="reminderButton" type="button">🔔 <span>تفعيل التنبيهات</span></button><button class="header-action" id="accountButton" type="button">👤 <span id="accountButtonText">تسجيل الدخول والمزامنة</span></button><button class="icon-button" id="quickAdd" aria-label="إضافة مهمة">＋</button></div></header>
+      <header class="topbar"><div><p class="eyebrow" id="todayLabel">يوم جميل للدراسة</p><h1>دراستي <span>👋</span></h1></div><div class="topbar-actions"><button class="header-action" id="reminderButton" type="button">🔔 <span>تفعيل التنبيهات</span></button><button class="header-action" id="accountButton" type="button">👤 <span id="accountButtonText">تسجيل الدخول والمزامنة</span></button><button class="icon-button" id="quickAdd" aria-label="إضافة مهمة">＋</button></div></header>
 
-      <section class="hero card"><div><span class="hero-tag">مساحتك لتنظيم الدراسة</span><h2>كل إنجاز كبير<br>يبدأ بخطوة صغيرة.</h2><p>رتّب يومك، أنجز مهامك، وشاهد تقدمك خطوة بخطوة.</p><a class="button button-light" href="#tasks" data-view="tasks">ابدأ إنجازك <span>←</span></a></div><div class="hero-art" aria-hidden="true"><div class="sun"></div><div class="book book-back"></div><div class="book book-front"><i></i><i></i><i></i></div><div class="sparkle">✦</div><div class="plant">✿</div></div></section>
+      <section class="hero card"><div><span class="hero-tag" id="heroGreeting">مرحبًا بك 👋</span><h2>يوم جديد، خطوة أقرب لهدفك.</h2><p>رتّب يومك، أنجز مهامك، وشاهد تقدمك خطوة بخطوة.</p><a class="button button-light" href="#tasks" data-view="tasks">ابدأ إنجازك <span>←</span></a></div><div class="hero-art" aria-hidden="true"><div class="sun"></div><div class="book book-back"></div><div class="book book-front"><i></i><i></i><i></i></div><div class="sparkle">✦</div><div class="plant">✿</div></div></section>
 
       <section class="stats-grid" aria-label="ملخص الدراسة">
         <article class="stat-card card"><span class="stat-icon purple">▤</span><div><span>المواد</span><strong id="subjectCount">0</strong></div><small>مواد دراسية</small></article>
@@ -46,10 +48,17 @@
         <section class="panel card" id="subjects"><div class="section-heading"><div><p class="eyebrow">تعرف على موادك</p><h2>المواد الدراسية</h2></div><button class="text-button" id="addSubject">＋ أضف مادة</button></div><div id="subjectList" class="subject-list"></div></section>
         <section class="panel card progress-panel" id="progress"><div class="section-heading"><div><p class="eyebrow">إنجازاتك تستحق الاحتفال</p><h2>تقدم هذا الأسبوع</h2></div><span class="progress-emoji">🌟</span></div><div class="progress-number"><strong id="progressValue">0%</strong><span>من مهامك اكتملت</span></div><div class="progress-track"><div id="progressBar"></div></div><p class="progress-caption" id="progressCaption">كل مهمة تنجزها تقرّبك من هدفك.</p><div class="week-days" id="weekDays"></div></section>
       </div>
+      <section class="profile-section card" id="profile">
+        <div class="section-heading"><div><p class="eyebrow">مساحتك الخاصة</p><h2>ملفي الشخصي</h2></div><button class="text-button" id="editProfileButton" type="button">✎ تعديل البيانات</button></div>
+        <div class="profile-overview"><div class="profile-avatar-large" id="profileAvatar">ط</div><div><p class="eyebrow">أهلًا بك في دراستي</p><h3 id="profileDisplayName">طالب دراستي</h3><p id="profileIntro">خصص ملفك الدراسي لتتابع رحلتك التعليمية.</p></div></div>
+        <div class="profile-details"><div><span>المرحلة الدراسية</span><strong id="profileStageDisplay">لم تُحدد بعد</strong></div><div><span>المدرسة</span><strong id="profileSchoolDisplay">لم تُضف بعد</strong></div></div>
+        <p class="profile-sync-note" id="profileSyncNote">تُحفظ بيانات الملف مع حسابك وتظهر على أجهزتك بعد تسجيل الدخول.</p>
+      </section>
       <footer>صُنع بحب لرحلتك الدراسية <span>♥</span></footer>
     </main>
   </div>
 
+  <dialog id="profileDialog"><form method="dialog" id="profileForm"><div class="dialog-header"><div><p class="eyebrow">دراستي</p><h2>تعديل الملف الشخصي</h2></div><button class="close-button" value="cancel" aria-label="إغلاق">×</button></div><label>الاسم<input id="profileNameInput" type="text" maxlength="60" required placeholder="اكتب اسمك"></label><label>المرحلة الدراسية<input id="profileStageInput" type="text" maxlength="60" placeholder="مثال: الصف الثالث الثانوي"></label><label>المدرسة (اختياري)<input id="profileSchoolInput" type="text" maxlength="80" placeholder="اسم المدرسة"></label><div class="dialog-actions"><button class="button button-primary" id="saveProfileButton" value="default">حفظ الملف</button><button class="button button-plain" type="button" id="cancelProfileButton">إلغاء</button></div></form></dialog>
   <dialog id="accountDialog"><form method="dialog" id="accountForm"><div class="dialog-header"><div><p class="eyebrow">حساب دراستي</p><h2>دخول ومزامنة</h2></div><button class="close-button" value="cancel" aria-label="إغلاق">×</button></div><p class="account-copy">أنشئ حسابًا أو سجّل الدخول بنفس البريد على أجهزتك لمزامنة مهامك وموادك.</p><label>البريد الإلكتروني<input id="accountEmail" type="email" autocomplete="email" required placeholder="name@example.com"></label><label>كلمة المرور<input id="accountPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="6 أحرف على الأقل"></label><p id="authMessage" class="auth-message" role="status"></p><div class="dialog-actions"><button class="button button-primary" id="signInButton" type="button">تسجيل الدخول</button><button class="button button-plain" id="signUpButton" type="button">إنشاء حساب</button></div><button class="text-button signout-button" id="signOutButton" type="button" hidden>تسجيل الخروج</button><p id="syncStatus" class="sync-status">الحفظ على هذا الجهاز فقط إلى أن يتم إعداد المزامنة.</p></form></dialog>
   <dialog id="formDialog"><form method="dialog" id="entryForm"><div class="dialog-header"><div><p class="eyebrow" id="formEyebrow">خطوة جديدة</p><h2 id="formTitle">أضف مهمة</h2></div><button class="close-button" value="cancel" aria-label="إغلاق">×</button></div><label id="nameLabel">اسم المهمة<input id="entryName" required maxlength="60" placeholder="مثال: مراجعة درس الكسور"></label><label id="detailLabel">المادة<select id="entrySubject"></select></label><label id="timeLabel" hidden>الوقت<input id="entryTime" type="time" value="16:00"></label><label id="durationLabel" hidden>مدة الجلسة بالدقائق<input id="entryDuration" type="number" min="10" max="240" value="30"></label><div class="dialog-actions"><button class="button button-primary" id="saveEntry" value="default">حفظ</button><button class="button button-plain" value="cancel">إلغاء</button></div></form></dialog>
   <div id="toast" role="status" aria-live="polite"></div>
