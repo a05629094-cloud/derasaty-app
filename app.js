@@ -37,6 +37,9 @@ function chooseHeroScene() {
   const scene = options[Math.floor(Math.random() * options.length)];
   $('#heroArt').dataset.scene = String(scene);
   $('#heroPanel').dataset.scene = String(scene);
+  $('#heroPanel').style.backgroundImage=`linear-gradient(270deg,#183a32bf 0%,#183a3270 53%,#183a3220 100%),url('./study-scene-${scene+1}.svg')`;
+  $('#heroPanel').style.backgroundPosition='center';
+  $('#heroPanel').style.backgroundSize='cover';
   localStorage.setItem(HERO_SCENE_KEY, String(scene));
 }
 const escapeHtml = (value) => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

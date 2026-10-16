@@ -1,5 +1,5 @@
-const CACHE_NAME='darasty-shell-v7';
-const APP_FILES=['./','./index.html','./style.css','./app.js','./supabase-config.js','./manifest.json','./darasty-192.png','./darasty-512.png'];
+const CACHE_NAME='darasty-shell-v8';
+const APP_FILES=['./','./index.html','./style.css','./app.js','./supabase-config.js','./manifest.json','./darasty-192.png','./darasty-512.png','./study-scene-1.svg','./study-scene-2.svg','./study-scene-3.svg','./study-scene-4.svg'];
 
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_FILES)));
