@@ -1,4 +1,4 @@
-const CACHE_NAME='darasty-shell-v8';
+const CACHE_NAME='darasty-shell-v9';
 const APP_FILES=['./','./index.html','./style.css','./app.js','./supabase-config.js','./manifest.json','./darasty-192.png','./darasty-512.png','./study-scene-1.svg','./study-scene-2.svg','./study-scene-3.svg','./study-scene-4.svg'];
 
 self.addEventListener('install',event=>{
