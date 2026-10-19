@@ -24,6 +24,7 @@
   };
   put('header.topbar', 'home');
   put('.hero', 'home');
+  put('#focusTimer', 'home');
   put('.stats-grid', 'home');
   put('#tasks', 'tasks');
   put('#subjects', 'subjects');

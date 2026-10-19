@@ -25,6 +25,8 @@ const seed = {
 let data;
 try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || structuredClone(seed); }
 catch { data = structuredClone(seed); }
+data.focusLog = Array.isArray(data.focusLog) ? data.focusLog : [];
+data.subjects.forEach(subject => { subject.lessons = Array.isArray(subject.lessons) ? subject.lessons : []; });
 const cloudConfig = window.DARASTY_SUPABASE || {};
 const cloudReady = Boolean(cloudConfig.url && cloudConfig.publishableKey && window.supabase?.createClient);
 const cloud = cloudReady ? window.supabase.createClient(cloudConfig.url, cloudConfig.publishableKey) : null;
@@ -47,6 +49,182 @@ const escapeHtml = (value) => String(value).replace(/[&<>"']/g, c => ({'&':'&amp
 const subjectFor = id => data.subjects.find(subject => subject.id === id);
 const dayKey = date => { const d = new Date(date); d.setHours(0,0,0,0); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); render(); scheduleCloudSave(); }
+let activeLessonSubjectId = null;
+let focusTimerId = null;
+let focusSecondsLeft = 25 * 60;
+let focusMode = 'study';
+
+function renderLessonList() {
+  const subject = data.subjects.find(item => item.id === activeLessonSubjectId);
+  const list = $('#lessonList');
+  const empty = $('#emptyLessons');
+  if (!subject || !list || !empty) return;
+  subject.lessons = Array.isArray(subject.lessons) ? subject.lessons : [];
+  $('#lessonSubjectName').textContent = subject.name;
+  list.replaceChildren();
+  empty.hidden = subject.lessons.length > 0;
+  subject.lessons.forEach(lesson => {
+    const row = document.createElement('div');
+    row.className = `lesson-row${lesson.done ? ' done' : ''}`;
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = Boolean(lesson.done);
+    checkbox.setAttribute('aria-label', `إتمام ${lesson.name}`);
+    const name = document.createElement('span');
+    name.className = 'lesson-name';
+    name.textContent = lesson.name;
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'lesson-remove';
+    remove.textContent = '×';
+    remove.setAttribute('aria-label', `حذف ${lesson.name}`);
+    checkbox.addEventListener('change', () => {
+      lesson.done = checkbox.checked;
+      save();
+      renderLessonList();
+    });
+    remove.addEventListener('click', () => {
+      subject.lessons = subject.lessons.filter(item => item.id !== lesson.id);
+      save();
+      renderLessonList();
+    });
+    row.append(checkbox, name, remove);
+    list.append(row);
+  });
+}
+
+function openLessonManager(subjectId) {
+  activeLessonSubjectId = subjectId;
+  renderLessonList();
+  $('#lessonDialog').showModal();
+}
+
+function showTaskMotivation(task) {
+  const messages = [
+    'أحسنت! كل خطوة صغيرة تقرّبك من هدفك 🌟',
+    'إنجاز رائع! استمر، أنت قادر على المزيد 💪',
+    'ممتاز! مهمة خلصت وخطوة جديدة للأمام 🎉',
+    'برافو عليك! تعبك اليوم يصنع نجاحك بكرة 📚',
+    'فخورين بإنجازك! خذ نفسًا وواصل طريقك ✨'
+  ];
+  $('#motivationTaskName').textContent = task.name;
+  $('#motivationMessage').textContent = messages[Math.floor(Math.random() * messages.length)];
+  $('#motivationDialog').showModal();
+}
+
+function updateFocusUi() {
+  const clock = $('#focusClock');
+  if (!clock) return;
+  const minutes = Math.floor(focusSecondsLeft / 60);
+  const seconds = focusSecondsLeft % 60;
+  clock.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  $('#focusModeLabel').textContent = focusMode === 'study' ? 'وقت المذاكرة' : 'وقت الراحة';
+  const logs = data.focusLog || [];
+  const total = logs.reduce((sum, entry) => sum + Number(entry.minutes || 25), 0);
+  $('#focusStats').textContent = `أنجزت ${logs.length} جلسة تركيز · ${total} دقيقة`;
+}
+
+function finishFocusPhase() {
+  clearInterval(focusTimerId);
+  focusTimerId = null;
+  if (focusMode === 'study') {
+    data.focusLog.push({
+      id: crypto.randomUUID(),
+      minutes: 25,
+      subject: $('#focusSubject').value,
+      task: $('#focusTask').value,
+      finishedAt: new Date().toISOString()
+    });
+    save();
+    showToast('أحسنت! انتهت جلسة التركيز. خذ راحة 5 دقائق ☕');
+    focusMode = 'break';
+    focusSecondsLeft = 5 * 60;
+    $('#focusStart').textContent = 'ابدأ الراحة';
+  } else {
+    showToast('انتهت الراحة. جاهز لجلسة مذاكرة جديدة؟ 📚');
+    focusMode = 'study';
+    focusSecondsLeft = 25 * 60;
+    $('#focusStart').textContent = 'ابدأ المذاكرة';
+  }
+  updateFocusUi();
+}
+
+function updateFocusOptions() {
+  const subjectSelect = $('#focusSubject');
+  const taskSelect = $('#focusTask');
+  if (!subjectSelect || !taskSelect) return;
+  const previousSubject = subjectSelect.value;
+  const previousTask = taskSelect.value;
+  subjectSelect.replaceChildren(new Option('اختر المادة (اختياري)', ''));
+  data.subjects.forEach(subject => subjectSelect.add(new Option(subject.name, subject.id)));
+  if (data.subjects.some(subject => subject.id === previousSubject)) subjectSelect.value = previousSubject;
+  taskSelect.replaceChildren(new Option('اختر المهمة (اختياري)', ''));
+  data.tasks.filter(task => !task.done).forEach(task => taskSelect.add(new Option(task.name, task.id)));
+  if (data.tasks.some(task => task.id === previousTask && !task.done)) taskSelect.value = previousTask;
+}
+
+function ensureFeatureUi() {
+  const hero = $('#heroPanel');
+  if (hero && !$('#focusTimer')) {
+    const timer = document.createElement('section');
+    timer.id = 'focusTimer';
+    timer.className = 'focus-timer card';
+    timer.innerHTML = `<div class="focus-intro"><p class="eyebrow">ركّز خطوة بخطوة</p><h2>مؤقّت المذاكرة</h2><p>25 دقيقة تركيز ثم 5 دقائق راحة</p><label>المادة<select id="focusSubject"></select></label><label>المهمة<select id="focusTask"></select></label></div><div class="focus-clock-area"><span id="focusModeLabel">وقت المذاكرة</span><strong id="focusClock">25:00</strong><div class="focus-buttons"><button id="focusStart" type="button">ابدأ المذاكرة</button><button id="focusReset" type="button">إعادة</button></div><small id="focusStats">أنجزت 0 جلسة · 0 دقيقة</small></div>`;
+    hero.after(timer);
+  }
+  if (!$('#lessonDialog')) {
+    const dialog = document.createElement('dialog');
+    dialog.id = 'lessonDialog';
+    dialog.className = 'feature-dialog';
+    dialog.innerHTML = `<div class="dialog-header"><div><p class="eyebrow">دروس المادة</p><h2 id="lessonSubjectName"></h2></div><button class="close-button" id="closeLessons" type="button" aria-label="إغلاق">×</button></div><form id="lessonForm"><label>اسم الدرس<input id="lessonNameInput" maxlength="100" required placeholder="اكتب اسم الدرس"></label><button class="button button-primary" type="submit">＋ أضف الدرس</button></form><p id="emptyLessons" class="empty-state">اكتب أسماء دروس المادة هنا، ثم علّم على الدرس بعد الانتهاء منه.</p><div id="lessonList" class="lesson-list"></div>`;
+    document.body.append(dialog);
+  }
+  if (!$('#motivationDialog')) {
+    const dialog = document.createElement('dialog');
+    dialog.id = 'motivationDialog';
+    dialog.className = 'feature-dialog motivation-dialog';
+    dialog.innerHTML = `<button class="close-button motivation-close" id="closeMotivation" type="button" aria-label="إغلاق">×</button><div class="motivation-emoji">🎉</div><p class="eyebrow">إنجاز جديد</p><h2 id="motivationTaskName"></h2><p id="motivationMessage"></p>`;
+    document.body.append(dialog);
+  }
+  $('#closeLessons').addEventListener('click', () => $('#lessonDialog').close());
+  $('#closeMotivation').addEventListener('click', () => $('#motivationDialog').close());
+  $('#lessonForm').addEventListener('submit', event => {
+    event.preventDefault();
+    const name = $('#lessonNameInput').value.trim();
+    const subject = data.subjects.find(item => item.id === activeLessonSubjectId);
+    if (!name || !subject) return;
+    subject.lessons = Array.isArray(subject.lessons) ? subject.lessons : [];
+    subject.lessons.push({ id: crypto.randomUUID(), name, done: false });
+    $('#lessonNameInput').value = '';
+    save();
+    renderLessonList();
+    showToast('تمت إضافة الدرس للمادة 📚');
+  });
+  $('#focusStart').addEventListener('click', () => {
+    if (focusTimerId) {
+      clearInterval(focusTimerId);
+      focusTimerId = null;
+      $('#focusStart').textContent = 'متابعة';
+      return;
+    }
+    $('#focusStart').textContent = 'إيقاف مؤقت';
+    focusTimerId = setInterval(() => {
+      focusSecondsLeft -= 1;
+      if (focusSecondsLeft <= 0) { focusSecondsLeft = 0; updateFocusUi(); finishFocusPhase(); }
+      else updateFocusUi();
+    }, 1000);
+  });
+  $('#focusReset').addEventListener('click', () => {
+    clearInterval(focusTimerId);
+    focusTimerId = null;
+    focusMode = 'study';
+    focusSecondsLeft = 25 * 60;
+    $('#focusStart').textContent = 'ابدأ المذاكرة';
+    updateFocusUi();
+  });
+  updateFocusOptions();
+  updateFocusUi();
+}
 function renderProfile(){
   data.profile=data.profile||{name:'طالب دراستي',stage:'',school:''};
   const name=(data.profile.name||'طالب دراستي').trim()||'طالب دراستي';
@@ -65,6 +243,8 @@ function renderProfile(){
   $('#welcomeTitle').textContent=`مرحبًا بك يا ${name} في دراستي`;
 }
 function render() {
+  data.subjects.forEach(subject => { subject.lessons = Array.isArray(subject.lessons) ? subject.lessons : []; });
+  data.focusLog = Array.isArray(data.focusLog) ? data.focusLog : [];
   const pending = data.tasks.filter(task => !task.done).length;
   const totalMinutes = data.sessions.reduce((sum, session) => sum + Number(session.duration || 0), 0);
   const pct = data.tasks.length ? Math.round(data.tasks.filter(task => task.done).length / data.tasks.length * 100) : 0;
@@ -81,7 +261,7 @@ function render() {
     const row = document.createElement('div'); row.className = `task-row${task.done?' done':''}`;
     row.innerHTML = `<input class="check-task" type="checkbox" aria-label="إنجاز ${escapeHtml(task.name)}" ${task.done?'checked':''}><div class="task-copy"><button class="task-emoji" type="button" aria-label="تغيير رمز المهمة">${escapeHtml(task.emoji||'📚')}</button><strong>${escapeHtml(task.name)}</strong><small>${subject?escapeHtml(subject.name):'بدون مادة'}</small></div><span class="task-time">${escapeHtml(task.time||'')}</span><button class="delete-task" aria-label="حذف المهمة">×</button>`;
     row.querySelector('.task-emoji').addEventListener('click', () => { const index=TASK_EMOJIS.indexOf(task.emoji||'📚'); task.emoji=TASK_EMOJIS[(index+1)%TASK_EMOJIS.length]; save(); });
-    row.querySelector('input').addEventListener('change', e => { task.done=e.target.checked; const key=dayKey(new Date()); data.week[key]=Math.max(0,(data.week[key]||0)+(task.done?1:-1)); save(); });
+    row.querySelector('input').addEventListener('change', e => { task.done=e.target.checked; const key=dayKey(new Date()); data.week[key]=Math.max(0,(data.week[key]||0)+(task.done?1:-1)); save(); if(task.done)showTaskMotivation(task); });
     row.querySelector('.delete-task').addEventListener('click', () => { data.tasks=data.tasks.filter(item=>item.id!==task.id); save(); }); taskList.append(row);
   });
   $('#emptyTasks').hidden = data.tasks.length > 0;
@@ -91,11 +271,22 @@ function render() {
     row.innerHTML=`<span class="schedule-time">${escapeHtml(session.time)}</span><span class="schedule-dot"></span><div class="schedule-copy"><strong>${escapeHtml(session.title)}</strong><small>${escapeHtml(String(session.duration))} دقيقة${subject?' · '+escapeHtml(subject.name):''}</small></div>`; schedule.append(row);
   });
   const subjects=$('#subjectList'); subjects.replaceChildren();
-  data.subjects.forEach(subject=>{const card=document.createElement('div');card.className='subject-card';card.innerHTML=`<span class="subject-mark" style="background:${escapeHtml(subject.color)}">${escapeHtml(subject.icon)}</span><div><strong>${escapeHtml(subject.name)}</strong><small>${escapeHtml(subject.detail||'مادة دراسية')}</small></div><button class="subject-remove" aria-label="حذف ${escapeHtml(subject.name)}">×</button>`;card.querySelector('button').addEventListener('click',()=>{data.subjects=data.subjects.filter(s=>s.id!==subject.id);data.tasks.forEach(t=>{if(t.subject===subject.id)t.subject='';});data.sessions.forEach(s=>{if(s.subject===subject.id)s.subject='';});save();});subjects.append(card);});
+  data.subjects.forEach(subject=>{
+    const lessons=Array.isArray(subject.lessons)?subject.lessons:[];
+    const completed=lessons.filter(lesson=>lesson.done).length;
+    const card=document.createElement('div');
+    card.className='subject-card';
+    card.innerHTML=`<span class="subject-mark" style="background:${escapeHtml(subject.color)}">${escapeHtml(subject.icon)}</span><div class="subject-copy"><strong>${escapeHtml(subject.name)}</strong><small>${escapeHtml(subject.detail||'مادة دراسية')}</small><small class="subject-lesson-count">الدروس: ${completed}/${lessons.length}</small></div><button class="subject-lessons" type="button">الدروس</button><button class="subject-remove" aria-label="حذف ${escapeHtml(subject.name)}">×</button>`;
+    card.querySelector('.subject-lessons').addEventListener('click',()=>openLessonManager(subject.id));
+    card.querySelector('.subject-remove').addEventListener('click',()=>{data.subjects=data.subjects.filter(s=>s.id!==subject.id);data.tasks.forEach(t=>{if(t.subject===subject.id)t.subject='';});data.sessions.forEach(s=>{if(s.subject===subject.id)s.subject='';});save();});
+    subjects.append(card);
+  });
   const currentMonday = new Date(); currentMonday.setDate(currentMonday.getDate()-((currentMonday.getDay()+6)%7));
   const dayNames=['ن','ث','ر','خ','ج','س','ح']; const week=$('#weekDays'); week.replaceChildren();
   dayNames.forEach((name,index)=>{const date=new Date(currentMonday);date.setDate(currentMonday.getDate()+index);const el=document.createElement('div');el.className=`week-day${date.toDateString()===new Date().toDateString()?' today':''}`;el.innerHTML=`${name}<i>${data.week[dayKey(date)]||0}</i>`;week.append(el);});
   const today=new Intl.DateTimeFormat('ar-EG',{weekday:'long',day:'numeric',month:'long'}).format(new Date()); $('#todayLabel').textContent=today;
+  updateFocusOptions();
+  updateFocusUi();
   renderProfile();
 }
 
@@ -262,6 +453,7 @@ $('#reminderButton').addEventListener('click',async()=>{
 });
 if(localStorage.getItem(REMINDER_KEY)==='true'&&'Notification'in window&&Notification.permission==='granted')$('#reminderButton').innerHTML='🔕 <span>إيقاف التنبيهات</span>';
 setInterval(checkStudyReminders,30000);
+ensureFeatureUi();
 initializeAccount();
 render();
 chooseHeroScene();

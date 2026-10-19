@@ -1,0 +1,23 @@
+طريقة تركيب المميزات الجديدة في دراستي
+
+الملفات: app.js و mockup-style-v5.css و page-navigation.js.
+
+1) افتح مستودع derasaty-app في GitHub.
+2) اختر Add file ثم Upload files.
+3) ارفع الملفات الثلاثة في جذر المستودع (نفس مكان index.html). اضغط Commit changes، ووافق على استبدال app.js و page-navigation.js إذا ظهرت رسالة.
+4) افتح index.html واضغط القلم Edit.
+5) ابحث عن سطر ملف mockup-style القديم مثل:
+<link rel="stylesheet" href="mockup-style-v2.css?v=2">
+استبدل هذا السطر فقط بالسطر:
+<link rel="stylesheet" href="mockup-style-v5.css?v=5">
+6) تأكد أن آخر index.html يحتوي مرة واحدة على هذين السطرين بهذا الترتيب:
+<script src="app.js"></script>
+<script src="page-navigation.js"></script>
+إذا كانا موجودين فاتركهما. لا تضف task-emojis.js؛ الإيموجي مدمج داخل app.js.
+7) اضغط Commit changes.
+8) انتظر دقيقة أو دقيقتين، ثم افتح رابط التطبيق واضغط Ctrl+F5.
+
+الاستخدام:
+- افتح «المواد» واضغط «الدروس» بجانب المادة. اكتب اسم الدرس واضغط أضف الدرس، ثم علّم عليه بعد إنجازه.
+- مؤقّت المذاكرة موجود في «الرئيسية»: 25 دقيقة تركيز ثم 5 دقائق راحة. يمكن اختيار مادة ومهمة قبل البدء.
+- عند تحديد مهمة كمكتملة تظهر رسالة تشجيع، أغلقها من ×.
