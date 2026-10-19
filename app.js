@@ -1,6 +1,7 @@
 const STORAGE_KEY = 'derasaty-data-v1';
 const REMINDER_KEY = 'derasaty-reminders-enabled';
 const LAST_REMINDER_KEY = 'derasaty-last-reminder';
+const TASK_EMOJIS = ['📚','✏️','📝','🧮','🔬','🌍','🎓','⭐'];
 const seed = {
   subjects: [
     {id:'math', name:'الرياضيات', icon:'∑', color:'#eee8f7', detail:'تدريب وفهم'},
@@ -9,9 +10,9 @@ const seed = {
     {id:'english', name:'اللغة الإنجليزية', icon:'A', color:'#e8eef7', detail:'كلمات ومحادثة'}
   ],
   tasks: [
-    {id:'t1', name:'حل تدريبات درس الكسور', subject:'math', time:'16:00', done:false},
-    {id:'t2', name:'قراءة قصة قصيرة', subject:'arabic', time:'17:00', done:false},
-    {id:'t3', name:'مراجعة الجهاز الهضمي', subject:'science', time:'18:00', done:false}
+    {id:'t1', name:'حل تدريبات درس الكسور', subject:'math', time:'16:00', done:false, emoji:'🧮'},
+    {id:'t2', name:'قراءة قصة قصيرة', subject:'arabic', time:'17:00', done:false, emoji:'📚'},
+    {id:'t3', name:'مراجعة الجهاز الهضمي', subject:'science', time:'18:00', done:false, emoji:'🔬'}
   ],
   sessions: [
     {id:'s1', time:'04:00 م', title:'تدريبات الرياضيات', duration:40, subject:'math'},
@@ -78,7 +79,8 @@ function render() {
   data.tasks.forEach(task => {
     const subject = subjectFor(task.subject);
     const row = document.createElement('div'); row.className = `task-row${task.done?' done':''}`;
-    row.innerHTML = `<input class="check-task" type="checkbox" aria-label="إنجاز ${escapeHtml(task.name)}" ${task.done?'checked':''}><div class="task-copy"><strong>${escapeHtml(task.name)}</strong><small>${subject?escapeHtml(subject.name):'بدون مادة'}</small></div><span class="task-time">${escapeHtml(task.time||'')}</span><button class="delete-task" aria-label="حذف المهمة">×</button>`;
+    row.innerHTML = `<input class="check-task" type="checkbox" aria-label="إنجاز ${escapeHtml(task.name)}" ${task.done?'checked':''}><div class="task-copy"><button class="task-emoji" type="button" aria-label="تغيير رمز المهمة">${escapeHtml(task.emoji||'📚')}</button><strong>${escapeHtml(task.name)}</strong><small>${subject?escapeHtml(subject.name):'بدون مادة'}</small></div><span class="task-time">${escapeHtml(task.time||'')}</span><button class="delete-task" aria-label="حذف المهمة">×</button>`;
+    row.querySelector('.task-emoji').addEventListener('click', () => { const index=TASK_EMOJIS.indexOf(task.emoji||'📚'); task.emoji=TASK_EMOJIS[(index+1)%TASK_EMOJIS.length]; save(); });
     row.querySelector('input').addEventListener('change', e => { task.done=e.target.checked; const key=dayKey(new Date()); data.week[key]=Math.max(0,(data.week[key]||0)+(task.done?1:-1)); save(); });
     row.querySelector('.delete-task').addEventListener('click', () => { data.tasks=data.tasks.filter(item=>item.id!==task.id); save(); }); taskList.append(row);
   });
@@ -98,15 +100,24 @@ function render() {
 }
 
 const dialog=$('#formDialog'); let mode='task';
+const taskEmojiLabel=document.createElement('label');
+taskEmojiLabel.id='taskEmojiLabel';
+taskEmojiLabel.textContent='اختار رمز المهمة';
+const taskEmojiSelect=document.createElement('select');
+taskEmojiSelect.id='taskEmojiSelect';
+[['📚','كتاب'],['✏️','قلم'],['📝','واجب'],['🧮','رياضيات'],['🔬','علوم'],['🌍','لغة'],['🎓','مذاكرة'],['⭐','أخرى']].forEach(([emoji,name])=>taskEmojiSelect.add(new Option(`${emoji} ${name}`,emoji)));
+taskEmojiLabel.append(taskEmojiSelect);
+$('#entryForm').insertBefore(taskEmojiLabel,$('#detailLabel'));
 function openForm(nextMode){mode=nextMode;$('#entryForm').reset();$('#entryTime').value='16:00';$('#entryDuration').value=30;
   const labels={task:['مهمة جديدة','أضف مهمة','اسم المهمة','المادة'],subject:['مادة جديدة','أضف مادة','اسم المادة','وصف قصير'],session:['جلسة جديدة','أضف جلسة دراسة','عنوان الجلسة','المادة']};
   const copy=labels[mode]; $('#formEyebrow').textContent=copy[0];$('#formTitle').textContent=copy[1];$('#nameLabel').firstChild.textContent=copy[2];$('#detailLabel').firstChild.textContent=copy[3];
+  taskEmojiLabel.hidden=mode!=='task';taskEmojiSelect.value='📚';
   $('#detailLabel').hidden=mode==='subject';$('#timeLabel').hidden=mode!=='session';$('#durationLabel').hidden=mode!=='session';
   const select=$('#entrySubject');select.replaceChildren();const empty=new Option('اختر مادة (اختياري)','');select.add(empty);data.subjects.forEach(s=>select.add(new Option(s.name,s.id)));
   dialog.showModal();$('#entryName').focus();
 }
 $('#entryForm').addEventListener('submit',event=>{event.preventDefault();const name=$('#entryName').value.trim();if(!name)return;
-  if(mode==='task') data.tasks.push({id:crypto.randomUUID(),name,subject:$('#entrySubject').value,time:'',done:false});
+  if(mode==='task') data.tasks.push({id:crypto.randomUUID(),name,subject:$('#entrySubject').value,time:'',done:false,emoji:taskEmojiSelect.value||'📚'});
   if(mode==='subject') data.subjects.push({id:crypto.randomUUID(),name,icon:'✦',color:['#eee8f7','#f9eee1','#e7f1eb','#e8eef7'][data.subjects.length%4],detail:'مادة دراسية'});
   if(mode==='session'){const raw=$('#entryTime').value;const [h,m]=raw.split(':').map(Number);const suffix=h>=12?'م':'ص';const hour=((h+11)%12)+1;data.sessions.push({id:crypto.randomUUID(),name,time:`${String(hour).padStart(2,'0')}:${String(m).padStart(2,'0')} ${suffix}`,title:name,duration:$('#entryDuration').value,subject:$('#entrySubject').value});}
   dialog.close();save();showToast('تمت الإضافة بنجاح ✨');
