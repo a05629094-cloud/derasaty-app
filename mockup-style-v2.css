@@ -1,0 +1,71 @@
+/* Warm, phone-first styling inspired by the supplied mockup. Keeps the existing app and data logic. */
+:root {
+  --ink: #183c36 !important;
+  --muted: #7e827b !important;
+  --green: #315f50 !important;
+  --green-dark: #254b40 !important;
+  --cream: #f5f0e6 !important;
+  --line: #e8dfd1 !important;
+  --white: #fbf8f1 !important;
+  --radius: 20px !important;
+}
+body { background: #f4eee3 !important; color: #183c36 !important; }
+.app-shell { background: #f4eee3 !important; }
+.sidebar { background: #fbf8f1 !important; }
+.nav-link.active, .nav-link:hover { background: #e5ede5 !important; color: #254b40 !important; }
+.main-content { max-width: 980px !important; }
+.card { background: #fbf8f1 !important; border-color: #e8dfd1 !important; box-shadow: 0 5px 20px #49391c0a !important; }
+.topbar h1, .page-heading h2, .section-heading h2 { color: #183c36 !important; }
+.hero, #heroPanel { background: linear-gradient(120deg, #203c37, #354c44) !important; color: #fffaf1 !important; }
+.hero h2, .hero p, .hero .hero-tag, #heroPanel h2, #heroPanel p, #heroPanel .hero-tag { color: #fffaf1 !important; }
+.hero p, #heroPanel p { opacity: .88; }
+.hero .button-light, #heroPanel .button-light { background: #f5f0e6 !important; color: #254b40 !important; }
+.stat-card, .panel, .subject-card { border-radius: 18px !important; }
+.subject-card { background: #f7f2e9 !important; border: 1px solid #e8dfd1 !important; }
+.progress-track { background: #e7e0d4 !important; }
+.progress-track div { background: #4f8067 !important; }
+.app-page { min-height: 65vh; }
+.app-page .page-heading { padding: 8px 4px 14px !important; }
+.app-page .page-heading .eyebrow { color: #8b887f !important; }
+.app-page > #tasks, .app-page > #subjects, .app-page > #schedule,
+.app-page > #progress, .app-page > #profile, .app-page > #profileSection {
+  background: #fbf8f1 !important; border: 1px solid #e8dfd1 !important;
+  border-radius: 20px !important; box-shadow: 0 5px 20px #49391c0a !important;
+}
+.task-row { border-color: #eee7dc !important; }
+.check-task:checked { background: #315f50 !important; border-color: #315f50 !important; }
+.soft-badge { background: #e8eee6 !important; color: #315f50 !important; }
+.outline-button { border-color: #cbd8cc !important; background: #f8f6ef !important; color: #315f50 !important; }
+.header-action { background: #fbf8f1 !important; border-color: #e8dfd1 !important; color: #315f50 !important; }
+
+@media (max-width: 720px) {
+  body { background: #f4eee3 !important; }
+  .app-shell { padding-bottom: calc(82px + env(safe-area-inset-bottom)) !important; }
+  .main-content { padding: calc(14px + env(safe-area-inset-top)) 14px 22px !important; }
+  .topbar { align-items: center !important; }
+  .topbar h1 { font-size: 21px !important; }
+  .hero { min-height: 205px !important; border-radius: 19px !important; }
+  .hero-art { opacity: .72 !important; }
+  .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .app-page { min-height: calc(100dvh - 155px) !important; }
+  .app-page .page-heading h2 { font-size: 21px !important; }
+  .app-page > #tasks, .app-page > #subjects, .app-page > #schedule,
+  .app-page > #progress, .app-page > #profile, .app-page > #profileSection {
+    padding: 15px !important; border-radius: 19px !important;
+  }
+  .sidebar {
+    height: calc(72px + env(safe-area-inset-bottom)) !important;
+    padding: 5px 5px calc(5px + env(safe-area-inset-bottom)) !important;
+    background: #fbf8f1 !important; border-top: 1px solid #e8dfd1 !important;
+    box-shadow: 0 -5px 18px #49391c12 !important;
+  }
+  .sidebar nav { justify-content: space-around !important; gap: 2px !important; }
+  .nav-link {
+    min-height: 56px !important; padding: 4px 2px !important; border-radius: 14px !important;
+    color: #7e827b !important; font-size: 10px !important; font-weight: 600 !important;
+  }
+  .nav-link span { font-size: 20px !important; }
+  .nav-link.active { background: transparent !important; color: #315f50 !important; font-weight: 800 !important; }
+  .nav-link.active span { transform: translateY(-1px); }
+  .nav-add { order: 0 !important; align-self: center !important; flex: 0 0 48px !important; width: 48px !important; height: 48px !important; margin: 0 3px !important; border: 0 !important; border-radius: 50% !important; background: #315f50 !important; color: #fffaf1 !important; font: 400 28px/1 Tahoma, sans-serif !important; box-shadow: 0 4px 12px #254b4030 !important; }
+}
