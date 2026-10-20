@@ -101,13 +101,13 @@
     window.scrollTo({top:0,behavior:'smooth'});
   }
 
-  document.querySelectorAll('[data-view]').forEach(link => {
-    link.addEventListener('click', event => {
-      const key = link.dataset.view;
-      if (!pages.has(key)) return;
-      event.preventDefault();
-      showPage(key, true);
-    });
+  document.addEventListener('click', event => {
+    const link = event.target.closest('[data-view]');
+    if (!link) return;
+    const key = link.dataset.view;
+    if (!pages.has(key)) return;
+    event.preventDefault();
+    showPage(key, true);
   });
   window.addEventListener('popstate', () => showPage(location.hash.slice(1) || 'home'));
   showPage(location.hash.slice(1) || 'home');
