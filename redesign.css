@@ -101,3 +101,12 @@ body,.app-shell{background:#f4eee3!important;color:#183c36!important}
  .stat-card.card{min-height:82px!important;padding:11px!important}
  .stat-icon{border-radius:12px!important}
 }
+
+/* Home shortcuts and closer visual language to the supplied four-screen mockup. */
+.quick-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0}
+.quick-shortcut{min-height:86px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1px solid #e6ddcf;border-radius:18px;background:#fbf8f1;color:#183c36;text-decoration:none;box-shadow:0 5px 18px #49391c0b;transition:transform .16s,box-shadow .16s}
+.quick-shortcut:hover{transform:translateY(-2px);box-shadow:0 9px 22px #49391c17}
+.quick-shortcut strong{font-size:11px}
+.shortcut-icon{width:37px;height:37px;display:grid;place-items:center;border-radius:12px;font-size:19px}
+.shortcut-green{background:#e3eee6;color:#315f50}.shortcut-blue{background:#e1ecf6;color:#4779a6}.shortcut-sand{background:#f4e9d7;color:#a47743}.shortcut-lilac{background:#eee5f1;color:#866391}
+@media(max-width:720px){.quick-shortcuts{gap:8px;margin:10px 0}.quick-shortcut{min-height:77px;border-radius:15px;gap:6px}.quick-shortcut strong{font-size:10px}.shortcut-icon{width:33px;height:33px}}
