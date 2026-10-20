@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="./darasty-192.png">
   <link rel="stylesheet" href="style.css">
  <link rel="stylesheet" href="mockup-style-v5.css?v=6">
-  <link rel="stylesheet" href="redesign.css?v=20261020-2">
+  <link rel="stylesheet" href="redesign.css?v=20261020-3">
 </head>
 <body>
   <div class="app-shell">
@@ -34,6 +34,13 @@
       <header class="topbar"><div><p class="eyebrow" id="todayLabel">يوم جميل للدراسة</p><h1>دراستي <span>👋</span></h1></div><div class="topbar-actions"><button class="header-action" id="reminderButton" type="button">🔔 <span>تفعيل التنبيهات</span></button><button class="header-action" id="accountButton" type="button">👤 <span id="accountButtonText">تسجيل الدخول والمزامنة</span></button><button class="icon-button" id="quickAdd" aria-label="إضافة مهمة">＋</button></div></header>
 
       <section class="hero card" id="heroPanel"><div><span class="hero-tag" id="heroGreeting">مرحبًا بك 👋</span><h2>يوم جديد، خطوة أقرب لهدفك.</h2><p>رتّب يومك، أنجز مهامك، وشاهد تقدمك خطوة بخطوة.</p><a class="button button-light" href="#tasks" data-view="tasks">ابدأ إنجازك <span>←</span></a></div><div class="hero-art" id="heroArt" aria-hidden="true"><div class="sun"></div><div class="book book-back"></div><div class="book book-front"><i></i><i></i><i></i></div><div class="sparkle">✦</div><div class="plant">✿</div></div></section>
+
+      <nav class="quick-shortcuts" aria-label="اختصارات دراستي">
+        <a class="quick-shortcut" href="#subjects" data-view="subjects"><span class="shortcut-icon shortcut-green">▤</span><strong>المواد</strong></a>
+        <a class="quick-shortcut" href="#tasks" data-view="tasks"><span class="shortcut-icon shortcut-blue">☑</span><strong>المهام</strong></a>
+        <a class="quick-shortcut" href="#schedule" data-view="schedule"><span class="shortcut-icon shortcut-sand">▦</span><strong>التقويم</strong></a>
+        <a class="quick-shortcut" href="#progress" data-view="progress"><span class="shortcut-icon shortcut-lilac">↗</span><strong>الإحصائيات</strong></a>
+      </nav>
 
       <section class="stats-grid" aria-label="ملخص الدراسة">
         <article class="stat-card card"><span class="stat-icon purple">▤</span><div><span>المواد</span><strong id="subjectCount">0</strong></div><small>مواد دراسية</small></article>
