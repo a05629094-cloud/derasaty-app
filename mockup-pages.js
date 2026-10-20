@@ -73,6 +73,21 @@
     renderWeek();
   }
 
+  const scheduleList=document.getElementById('scheduleList');
+  if(scheduleList){
+    const decorateSessions=()=>{
+      scheduleList.querySelectorAll('.schedule-row').forEach(row=>{
+        if(row.querySelector('.reference-session-icon'))return;
+        const title=row.querySelector('.schedule-copy strong')?.textContent||'';
+        const icon=document.createElement('span');icon.className='reference-session-icon';
+        icon.textContent=/استراحة/.test(title)?'☕':/تاريخ/.test(title)?'🏛️':/رياض|معادلات|حساب/.test(title)?'∑':/فيزياء/.test(title)?'⚛️':/عربي|قراءة/.test(title)?'📖':'📘';
+        row.insertBefore(icon,row.querySelector('.schedule-copy'));
+      });
+    };
+    decorateSessions();
+    new MutationObserver(decorateSessions).observe(scheduleList,{childList:true,subtree:true});
+  }
+
   const subjectList=document.getElementById('subjectList');
   if(subjectList){
     const subjectColors=['#211a35','#477cda','#b96570','#4b8068','#a47ab4'];
