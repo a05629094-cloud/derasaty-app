@@ -483,3 +483,9 @@ html,body{background:#eef0f4!important;color:#17152b!important;font-family:Tahom
  .task-filters{gap:5px!important}
  .task-filter{padding:7px 9px!important;font-size:9px!important}
 }
+.home-today .task-emoji-select{display:none!important}
+@media(max-width:720px){
+ #tasks .task-row .task-copy strong{font-size:10px!important}
+ #tasks .task-row .task-copy small{font-size:8px!important}
+ #tasks .task-row .task-emoji{width:27px!important;height:27px!important}
+}
