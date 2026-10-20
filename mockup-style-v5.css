@@ -222,3 +222,73 @@ body { background: #f4eee3 !important; color: #183c36 !important; }
   #focusTimer.focus-timer { grid-template-columns: minmax(0,1fr) !important; padding: 15px !important; }
   .focus-intro label { width: 48% !important; }
 }
+
+
+/* Daily target, achievement streak, and per-subject review cards */
+.daily-target {
+  grid-column: 1 / -1 !important;
+  padding: 14px 16px !important;
+  border: 1px solid #e8dfd1 !important;
+  border-radius: 16px !important;
+  background: #f7f2e9 !important;
+}
+.daily-target-heading, .daily-target-foot {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+.daily-target-heading > div > strong { color: #315f50 !important; font-size: 16px !important; }
+.daily-target-heading label { display: grid !important; gap: 4px !important; color: #7e827b !important; font-size: 10px !important; }
+#dailyGoalInput {
+  width: 104px !important;
+  padding: 7px 9px !important;
+  border: 1px solid #e8dfd1 !important;
+  border-radius: 9px !important;
+  background: #fffdf8 !important;
+  color: #183c36 !important;
+  font: 700 12px 'Cairo',Tahoma,sans-serif !important;
+}
+.daily-target-bar { height: 9px !important; margin: 11px 0 8px !important; overflow: hidden !important; border-radius: 99px !important; background: #e5dfd4 !important; }
+#dailyGoalBar { display: block !important; width: 0; height: 100% !important; border-radius: inherit !important; background: linear-gradient(90deg,#4f8064,#75a580) !important; transition: width .3s ease !important; }
+.daily-target-foot { color: #7e827b !important; font-size: 10px !important; }
+#studyStreak { color: #315f50 !important; }
+
+.subject-card { grid-template-columns: 34px minmax(0,1fr) auto auto 26px !important; gap: 7px !important; }
+.subject-cards, .subject-lessons {
+  border: 0 !important;
+  border-radius: 9px !important;
+  padding: 7px 9px !important;
+  background: #e7eee6 !important;
+  color: #315f50 !important;
+  font: 700 10px 'Cairo',Tahoma,sans-serif !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+}
+.subject-cards { background: #f2e9d7 !important; color: #8b6935 !important; }
+.feature-dialog textarea {
+  display: block !important;
+  width: 100% !important;
+  margin-top: 6px !important;
+  padding: 10px !important;
+  border: 1px solid #e5dfd4 !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  color: #263a39 !important;
+  font: 12px/1.7 'Cairo',Tahoma,sans-serif !important;
+  resize: vertical !important;
+}
+#flashcardForm { display: grid !important; gap: 8px !important; margin-bottom: 14px !important; }
+#flashcardForm label { display: block !important; font-size: 11px !important; font-weight: 700 !important; }
+.flashcard-list { display: grid !important; gap: 9px !important; }
+.flashcard-item { padding: 12px !important; border: 1px solid #e8dfd1 !important; border-radius: 13px !important; background: #f7f2e9 !important; }
+.flashcard-question { display: block !important; color: #183c36 !important; font-size: 13px !important; line-height: 1.8 !important; overflow-wrap: anywhere !important; }
+.flashcard-answer { margin: 9px 0 !important; padding: 9px !important; border-radius: 9px !important; background: #e9f0e8 !important; color: #315f50 !important; font-size: 12px !important; line-height: 1.8 !important; white-space: pre-wrap !important; overflow-wrap: anywhere !important; }
+.flashcard-actions { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 8px !important; margin-top: 8px !important; }
+.flashcard-reveal { width: auto !important; min-height: 32px !important; padding: 5px 12px !important; border-style: solid !important; }
+
+@media (max-width: 440px) {
+  .subject-card { grid-template-columns: 30px minmax(0,1fr) auto auto 22px !important; gap: 5px !important; padding: 8px !important; }
+  .subject-cards, .subject-lessons { padding: 6px 6px !important; font-size: 9px !important; }
+  .daily-target-foot { align-items: flex-start !important; flex-direction: column !important; gap: 4px !important; }
+}
