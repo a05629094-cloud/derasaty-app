@@ -132,3 +132,35 @@ body,.app-shell{background:#f4eee3!important;color:#183c36!important}
  .home-week-days .week-day{padding:6px 1px!important;font-size:8px!important}
  .home-week-days .week-day i{width:26px!important;height:26px!important}
 }
+
+/* Mobile repair: keep every page within the viewport and make the bottom bar usable. */
+@media(max-width:720px){
+ html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+ .app-shell{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:clip!important}
+ .main-content{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:calc(12px + env(safe-area-inset-top)) 12px calc(96px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important}
+ .app-page{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+ .app-page[hidden]{display:none!important}
+ .app-page>#tasks,.app-page>#subjects,.app-page>#schedule,.app-page>#progress,.app-page>#profile,.app-page>#profileSection,.home-today,.home-week{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+ .topbar{width:100%!important;min-width:0!important;gap:8px!important}
+ .topbar>div:first-child{min-width:0}
+ .topbar-actions{max-width:56%;min-width:0;gap:4px!important;flex-wrap:wrap!important}
+ .header-action{max-width:100%;overflow:hidden}
+ #heroPanel.hero{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;background-position:center,40% center!important}
+ #heroPanel>div:first-child{width:100%!important;max-width:78%!important;min-width:0!important}
+ .quick-shortcuts{width:100%;grid-template-columns:repeat(4,minmax(0,1fr))!important;box-sizing:border-box}
+ #subjects .subject-card{display:grid!important;grid-template-columns:34px minmax(0,1fr) auto!important;grid-template-areas:"mark copy remove" "mark lessons cards"!important;gap:7px!important;min-width:0!important;box-sizing:border-box!important}
+ #subjects .subject-mark{grid-area:mark!important}
+ #subjects .subject-copy{grid-area:copy!important;min-width:0!important}
+ #subjects .subject-remove{grid-area:remove!important;grid-column:auto!important;grid-row:auto!important}
+ #subjects .subject-lessons{grid-area:lessons!important;grid-row:auto!important;justify-self:start}
+ #subjects .subject-cards{grid-area:cards!important;grid-row:auto!important;justify-self:end}
+ #tasks .task-row,.home-today .task-row{width:100%!important;min-width:0!important;box-sizing:border-box!important}
+ .task-copy,.subject-copy{overflow:hidden!important}
+ .sidebar{position:fixed!important;z-index:50!important;inset:auto 0 0!important;width:100%!important;max-width:100%!important;height:72px!important;box-sizing:border-box!important;overflow:hidden!important}
+ .sidebar nav{width:100%!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;justify-content:stretch!important;align-items:center!important;gap:2px!important;overflow:visible!important}
+ .sidebar nav .nav-link[data-view="schedule"],.sidebar nav .nav-link[data-view="focus"],.sidebar nav .nav-link[data-view="progress"]{display:none!important}
+ .sidebar nav .nav-link{width:100%!important;min-width:0!important;max-width:100%!important;flex:none!important;overflow:hidden!important}
+ .sidebar nav .nav-add{width:44px!important;height:44px!important;min-width:44px!important;justify-self:center!important;margin:0!important}
+ dialog{max-width:calc(100vw - 24px)!important;max-height:calc(100dvh - 30px)!important;box-sizing:border-box!important}
+ .dialog-actions{flex-wrap:wrap}
+}
