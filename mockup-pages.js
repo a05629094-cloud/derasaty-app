@@ -85,8 +85,12 @@
         const done=match?Number(match[1]):0,total=match?Number(match[2]):0,pct=total?Math.round(done/total*100):0;
         let wrap=card.querySelector('.subject-progress');
         if(!wrap){wrap=document.createElement('div');wrap.className='subject-progress';card.append(wrap);}
-        wrap.setAttribute('aria-label','تقدم الدروس '+pct+'%');
-        wrap.innerHTML='<span style="width:'+pct+'%;background:'+subjectColors[index%subjectColors.length]+'"></span>';
+        const color=subjectColors[index%subjectColors.length];
+        if(wrap.dataset.value!==String(pct)||wrap.dataset.color!==color){
+          wrap.dataset.value=String(pct);wrap.dataset.color=color;
+          wrap.setAttribute('aria-label','تقدم الدروس '+pct+'%');
+          wrap.innerHTML='<span style="width:'+pct+'%;background:'+color+'"></span>';
+        }
         if(subject){
           const button=card.querySelector('.subject-lessons');
           if(button)button.textContent='＋ أضف درسًا';
