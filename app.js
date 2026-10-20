@@ -26,7 +26,9 @@ let data;
 try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || structuredClone(seed); }
 catch { data = structuredClone(seed); }
 data.focusLog = Array.isArray(data.focusLog) ? data.focusLog : [];
-data.subjects.forEach(subject => { subject.lessons = Array.isArray(subject.lessons) ? subject.lessons : []; });
+data.week = data.week && typeof data.week === 'object' ? data.week : {};
+data.dailyGoalMinutes = Number(data.dailyGoalMinutes) || 60;
+data.subjects.forEach(subject => { subject.lessons = Array.isArray(subject.lessons) ? subject.lessons : []; subject.flashcards = Array.isArray(subject.flashcards) ? subject.flashcards : []; });
 const cloudConfig = window.DARASTY_SUPABASE || {};
 const cloudReady = Boolean(cloudConfig.url && cloudConfig.publishableKey && window.supabase?.createClient);
 const cloud = cloudReady ? window.supabase.createClient(cloudConfig.url, cloudConfig.publishableKey) : null;
@@ -107,9 +109,128 @@ function showTaskMotivation(task) {
     'برافو عليك! تعبك اليوم يصنع نجاحك بكرة 📚',
     'فخورين بإنجازك! خذ نفسًا وواصل طريقك ✨'
   ];
+  playSuccessChime();
   $('#motivationTaskName').textContent = task.name;
   $('#motivationMessage').textContent = messages[Math.floor(Math.random() * messages.length)];
   $('#motivationDialog').showModal();
+}
+
+let activeFlashcardSubjectId = null;
+
+function playSuccessChime() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.28, ctx.currentTime);
+    master.connect(ctx.destination);
+    [
+      { frequency: 659.25, delay: 0, length: 0.75 },
+      { frequency: 830.61, delay: 0.20, length: 0.85 },
+      { frequency: 987.77, delay: 0.40, length: 0.95 },
+      { frequency: 1318.51, delay: 0.62, length: 1.15 }
+    ].forEach(note => {
+      const start = ctx.currentTime + note.delay;
+      const oscillator = ctx.createOscillator();
+      const volume = ctx.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(note.frequency, start);
+      volume.gain.setValueAtTime(0.0001, start);
+      volume.gain.exponentialRampToValueAtTime(0.16, start + 0.025);
+      volume.gain.exponentialRampToValueAtTime(0.0001, start + note.length);
+      oscillator.connect(volume);
+      volume.connect(master);
+      oscillator.start(start);
+      oscillator.stop(start + note.length + 0.03);
+    });
+    setTimeout(() => ctx.close().catch(() => {}), 1900);
+  } catch {}
+}
+
+function currentStudyStreak() {
+  const activeDays = new Set();
+  Object.entries(data.week || {}).forEach(([day, count]) => { if (Number(count) > 0) activeDays.add(day); });
+  (data.focusLog || []).forEach(entry => { if (entry.finishedAt) activeDays.add(dayKey(new Date(entry.finishedAt))); });
+  let cursor = new Date();
+  cursor.setHours(0, 0, 0, 0);
+  if (!activeDays.has(dayKey(cursor))) cursor.setDate(cursor.getDate() - 1);
+  if (!activeDays.has(dayKey(cursor))) return 0;
+  let streak = 0;
+  while (activeDays.has(dayKey(cursor)) && streak < 3650) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
+function updateDailyGoalUi() {
+  const targetInput = $('#dailyGoalInput');
+  if (!targetInput) return;
+  const target = Math.max(15, Math.min(600, Number(data.dailyGoalMinutes) || 60));
+  data.dailyGoalMinutes = target;
+  if (document.activeElement !== targetInput) targetInput.value = target;
+  const today = dayKey(new Date());
+  const minutes = (data.focusLog || []).filter(entry => entry.finishedAt && dayKey(new Date(entry.finishedAt)) === today)
+    .reduce((sum, entry) => sum + Number(entry.minutes || 25), 0);
+  $('#dailyGoalMinutes').textContent = minutes;
+  $('#dailyGoalTarget').textContent = target;
+  $('#dailyGoalBar').style.width = `${Math.min(100, Math.round(minutes / target * 100))}%`;
+  $('#dailyGoalMessage').textContent = minutes >= target ? 'حققت هدفك اليوم! ممتاز 🎉' : `باقي ${target - minutes} دقيقة على هدفك.`;
+  const streak = currentStudyStreak();
+  $('#studyStreak').textContent = streak >= 7 ? `🔥 ${streak} أيام متتالية · بطل الأسبوع!` : `🔥 سلسلة إنجازك: ${streak} يوم`;
+}
+
+function renderFlashcardList() {
+  const subject = data.subjects.find(item => item.id === activeFlashcardSubjectId);
+  const list = $('#flashcardList');
+  const empty = $('#emptyFlashcards');
+  if (!subject || !list || !empty) return;
+  subject.flashcards = Array.isArray(subject.flashcards) ? subject.flashcards : [];
+  $('#flashcardSubjectName').textContent = subject.name;
+  list.replaceChildren();
+  empty.hidden = subject.flashcards.length > 0;
+  subject.flashcards.forEach(card => {
+    const item = document.createElement('article');
+    item.className = 'flashcard-item';
+    const question = document.createElement('strong');
+    question.className = 'flashcard-question';
+    question.textContent = card.question;
+    const answer = document.createElement('p');
+    answer.className = 'flashcard-answer';
+    answer.textContent = card.answer;
+    answer.hidden = true;
+    const actions = document.createElement('div');
+    actions.className = 'flashcard-actions';
+    const reveal = document.createElement('button');
+    reveal.type = 'button';
+    reveal.className = 'outline-button flashcard-reveal';
+    reveal.textContent = 'اظهر الإجابة';
+    reveal.addEventListener('click', () => {
+      answer.hidden = !answer.hidden;
+      reveal.textContent = answer.hidden ? 'اظهر الإجابة' : 'اخفِ الإجابة';
+    });
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'lesson-remove';
+    remove.textContent = '×';
+    remove.setAttribute('aria-label', 'حذف البطاقة');
+    remove.addEventListener('click', () => {
+      subject.flashcards = subject.flashcards.filter(entry => entry.id !== card.id);
+      save();
+      renderFlashcardList();
+    });
+    actions.append(reveal, remove);
+    item.append(question, answer, actions);
+    list.append(item);
+  });
+}
+
+function openFlashcards(subjectId) {
+  activeFlashcardSubjectId = subjectId;
+  renderFlashcardList();
+  $('#flashcardDialog').showModal();
 }
 
 function updateFocusUi() {
@@ -122,6 +243,7 @@ function updateFocusUi() {
   const logs = data.focusLog || [];
   const total = logs.reduce((sum, entry) => sum + Number(entry.minutes || 25), 0);
   $('#focusStats').textContent = `أنجزت ${logs.length} جلسة تركيز · ${total} دقيقة`;
+  updateDailyGoalUi();
 }
 
 function finishFocusPhase() {
@@ -169,7 +291,7 @@ function ensureFeatureUi() {
     const timer = document.createElement('section');
     timer.id = 'focusTimer';
     timer.className = 'focus-timer card';
-    timer.innerHTML = `<div class="focus-intro"><p class="eyebrow">ركّز خطوة بخطوة</p><h2>مؤقّت المذاكرة</h2><p>25 دقيقة تركيز ثم 5 دقائق راحة</p><label>المادة<select id="focusSubject"></select></label><label>المهمة<select id="focusTask"></select></label></div><div class="focus-clock-area"><span id="focusModeLabel">وقت المذاكرة</span><strong id="focusClock">25:00</strong><div class="focus-buttons"><button id="focusStart" type="button">ابدأ المذاكرة</button><button id="focusReset" type="button">إعادة</button></div><small id="focusStats">أنجزت 0 جلسة · 0 دقيقة</small></div>`;
+    timer.innerHTML = `<div class="focus-intro"><p class="eyebrow">ركّز خطوة بخطوة</p><h2>مؤقّت المذاكرة</h2><p>25 دقيقة تركيز ثم 5 دقائق راحة</p><label>المادة<select id="focusSubject"></select></label><label>المهمة<select id="focusTask"></select></label></div><div class="focus-clock-area"><span id="focusModeLabel">وقت المذاكرة</span><strong id="focusClock">25:00</strong><div class="focus-buttons"><button id="focusStart" type="button">ابدأ المذاكرة</button><button id="focusReset" type="button">إعادة</button></div><small id="focusStats">أنجزت 0 جلسة · 0 دقيقة</small></div><section class="daily-target"><div class="daily-target-heading"><div><p class="eyebrow">هدفي اليوم</p><strong><span id="dailyGoalMinutes">0</span> / <span id="dailyGoalTarget">60</span> دقيقة</strong></div><label>الهدف بالدقائق<input id="dailyGoalInput" type="number" min="15" max="600" step="15" value="60"></label></div><div class="daily-target-bar"><span id="dailyGoalBar"></span></div><div class="daily-target-foot"><span id="dailyGoalMessage"></span><strong id="studyStreak">🔥 سلسلة إنجازك: 0 يوم</strong></div></section>`;
     hero.after(timer);
   }
   if (!$('#lessonDialog')) {
@@ -177,6 +299,13 @@ function ensureFeatureUi() {
     dialog.id = 'lessonDialog';
     dialog.className = 'feature-dialog';
     dialog.innerHTML = `<div class="dialog-header"><div><p class="eyebrow">دروس المادة</p><h2 id="lessonSubjectName"></h2></div><button class="close-button" id="closeLessons" type="button" aria-label="إغلاق">×</button></div><form id="lessonForm"><label>اسم الدرس<input id="lessonNameInput" maxlength="100" required placeholder="اكتب اسم الدرس"></label><button class="button button-primary" type="submit">＋ أضف الدرس</button></form><p id="emptyLessons" class="empty-state">اكتب أسماء دروس المادة هنا، ثم علّم على الدرس بعد الانتهاء منه.</p><div id="lessonList" class="lesson-list"></div>`;
+    document.body.append(dialog);
+  }
+  if (!$('#flashcardDialog')) {
+    const dialog = document.createElement('dialog');
+    dialog.id = 'flashcardDialog';
+    dialog.className = 'feature-dialog';
+    dialog.innerHTML = `<div class="dialog-header"><div><p class="eyebrow">بطاقات مراجعة</p><h2 id="flashcardSubjectName"></h2></div><button class="close-button" id="closeFlashcards" type="button" aria-label="إغلاق">×</button></div><form id="flashcardForm"><label>السؤال<textarea id="flashcardQuestion" rows="2" maxlength="300" required placeholder="اكتب سؤالًا للمراجعة"></textarea></label><label>الإجابة<textarea id="flashcardAnswer" rows="2" maxlength="500" required placeholder="اكتب الإجابة"></textarea></label><button class="button button-primary" type="submit">＋ أضف بطاقة</button></form><p id="emptyFlashcards" class="empty-state">أضف سؤالًا وإجابته، ثم اختبر ذاكرتك بإخفاء الإجابة.</p><div id="flashcardList" class="flashcard-list"></div>`;
     document.body.append(dialog);
   }
   if (!$('#motivationDialog')) {
@@ -187,6 +316,26 @@ function ensureFeatureUi() {
     document.body.append(dialog);
   }
   $('#closeLessons').addEventListener('click', () => $('#lessonDialog').close());
+  $('#closeFlashcards').addEventListener('click', () => $('#flashcardDialog').close());
+  $('#flashcardForm').addEventListener('submit', event => {
+    event.preventDefault();
+    const subject = data.subjects.find(item => item.id === activeFlashcardSubjectId);
+    const question = $('#flashcardQuestion').value.trim();
+    const answer = $('#flashcardAnswer').value.trim();
+    if (!subject || !question || !answer) return;
+    subject.flashcards = Array.isArray(subject.flashcards) ? subject.flashcards : [];
+    subject.flashcards.push({ id: crypto.randomUUID(), question, answer });
+    $('#flashcardQuestion').value = '';
+    $('#flashcardAnswer').value = '';
+    save();
+    renderFlashcardList();
+    showToast('تمت إضافة بطاقة المراجعة 📚');
+  });
+  $('#dailyGoalInput').addEventListener('change', () => {
+    data.dailyGoalMinutes = Math.max(15, Math.min(600, Number($('#dailyGoalInput').value) || 60));
+    save();
+    updateDailyGoalUi();
+  });
   $('#closeMotivation').addEventListener('click', () => $('#motivationDialog').close());
   $('#lessonForm').addEventListener('submit', event => {
     event.preventDefault();
@@ -273,10 +422,12 @@ function render() {
   const subjects=$('#subjectList'); subjects.replaceChildren();
   data.subjects.forEach(subject=>{
     const lessons=Array.isArray(subject.lessons)?subject.lessons:[];
+    const flashcards=Array.isArray(subject.flashcards)?subject.flashcards:[];
     const completed=lessons.filter(lesson=>lesson.done).length;
     const card=document.createElement('div');
     card.className='subject-card';
-    card.innerHTML=`<span class="subject-mark" style="background:${escapeHtml(subject.color)}">${escapeHtml(subject.icon)}</span><div class="subject-copy"><strong>${escapeHtml(subject.name)}</strong><small>${escapeHtml(subject.detail||'مادة دراسية')}</small><small class="subject-lesson-count">الدروس: ${completed}/${lessons.length}</small></div><button class="subject-lessons" type="button">الدروس</button><button class="subject-remove" aria-label="حذف ${escapeHtml(subject.name)}">×</button>`;
+    card.innerHTML=`<span class="subject-mark" style="background:${escapeHtml(subject.color)}">${escapeHtml(subject.icon)}</span><div class="subject-copy"><strong>${escapeHtml(subject.name)}</strong><small>${escapeHtml(subject.detail||'مادة دراسية')}</small><small class="subject-lesson-count">الدروس: ${completed}/${lessons.length}</small></div><button class="subject-cards" type="button">بطاقات (${flashcards.length})</button><button class="subject-lessons" type="button">الدروس</button><button class="subject-remove" aria-label="حذف ${escapeHtml(subject.name)}">×</button>`;
+    card.querySelector('.subject-cards').addEventListener('click',()=>openFlashcards(subject.id));
     card.querySelector('.subject-lessons').addEventListener('click',()=>openLessonManager(subject.id));
     card.querySelector('.subject-remove').addEventListener('click',()=>{data.subjects=data.subjects.filter(s=>s.id!==subject.id);data.tasks.forEach(t=>{if(t.subject===subject.id)t.subject='';});data.sessions.forEach(s=>{if(s.subject===subject.id)s.subject='';});save();});
     subjects.append(card);
