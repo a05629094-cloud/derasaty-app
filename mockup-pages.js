@@ -141,5 +141,6 @@
     }catch(error){console.warn('تعذر عرض قائمة الدروس داخل المواد',error);}
   };
   decorateLessons();
-  if(subjectList)new MutationObserver(decorateLessons).observe(subjectList,{childList:true,subtree:true});
+  const lessonsRoot=document.getElementById('subjectList');
+  if(lessonsRoot)new MutationObserver(decorateLessons).observe(lessonsRoot,{childList:true,subtree:true});
 })();
