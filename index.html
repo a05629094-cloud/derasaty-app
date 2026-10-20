@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="redesign.css?v=20261020-5">
 </head>
 <body>
+  <section class="launch-splash" id="launchSplash" aria-label="دراستي — شاشة البداية"><div class="launch-copy"><div class="launch-cap" aria-hidden="true">🎓</div><h1>دراستي</h1><p>خطتك. تنظيمك. نجاحك.</p><button class="button button-primary" id="launchStart" type="button">ابدأ الآن <span>←</span></button></div></section>
   <div class="app-shell">
     <aside class="sidebar">
       <a class="brand" href="#home"><span class="brand-icon">✦</span><span>دراستي<small>خطتك تبدأ اليوم</small></span></a>
@@ -31,7 +32,7 @@
     </aside>
 
     <main id="home" class="main-content">
-      <header class="topbar"><div><p class="eyebrow" id="todayLabel">يوم جميل للدراسة</p><h1>دراستي <span>👋</span></h1></div><div class="topbar-actions"><button class="header-action" id="reminderButton" type="button">🔔 <span>تفعيل التنبيهات</span></button><button class="header-action" id="accountButton" type="button">👤 <span id="accountButtonText">تسجيل الدخول والمزامنة</span></button><button class="icon-button" id="quickAdd" aria-label="إضافة مهمة">＋</button></div></header>
+      <header class="topbar"><div><p class="eyebrow" id="todayLabel">يوم جميل للدراسة</p><h1>دراستي <span>👋</span></h1></div><div class="topbar-actions"><a class="header-avatar" id="topbarProfileButton" href="#profile" data-view="profile" aria-label="الملف الشخصي"><span id="topbarAvatar">ط</span></a><button class="header-action" id="reminderButton" type="button">🔔 <span>تفعيل التنبيهات</span></button><button class="header-action" id="accountButton" type="button">👤 <span id="accountButtonText">تسجيل الدخول والمزامنة</span></button><button class="icon-button" id="quickAdd" aria-label="إضافة مهمة">＋</button></div></header>
 
       <section class="hero card" id="heroPanel"><div><span class="hero-tag" id="heroGreeting">مرحبًا بك 👋</span><h2>يوم جديد، خطوة أقرب لهدفك.</h2><p>رتّب يومك، أنجز مهامك، وشاهد تقدمك خطوة بخطوة.</p><a class="button button-light" href="#tasks" data-view="tasks">ابدأ إنجازك <span>←</span></a></div><div class="hero-art" id="heroArt" aria-hidden="true"><div class="sun"></div><div class="book book-back"></div><div class="book book-front"><i></i><i></i><i></i></div><div class="sparkle">✦</div><div class="plant">✿</div></div></section>
 
@@ -77,6 +78,7 @@
   <script src="supabase-config.js"></script>
   <script src="app.js"></script>
 <script src="page-navigation.js"></script>
+<script src="mockup-pages.js?v=1"></script>
 </body>
 </html>
 
