@@ -409,6 +409,13 @@ function render() {
     const subject = subjectFor(task.subject);
     const row = document.createElement('div'); row.className = `task-row${task.done?' done':''}`;
     row.innerHTML = `<input class="check-task" type="checkbox" aria-label="إنجاز ${escapeHtml(task.name)}" ${task.done?'checked':''}><div class="task-copy"><button class="task-emoji" type="button" aria-label="تغيير رمز المهمة">${escapeHtml(task.emoji||'📚')}</button><strong>${escapeHtml(task.name)}</strong><small>${subject?escapeHtml(subject.name):'بدون مادة'}</small></div><span class="task-time">${escapeHtml(task.time||'')}</span><button class="delete-task" aria-label="حذف المهمة">×</button>`;
+    const emojiNames={'📚':'كتاب','✏️':'كتابة','📝':'واجب','🧮':'رياضيات','🔬':'علوم','🌍':'لغة','🎓':'مذاكرة','⭐':'أخرى'};
+    const emojiSelect=document.createElement('select');
+    emojiSelect.className='task-emoji-select';
+    emojiSelect.setAttribute('aria-label','رمز المهمة: '+task.name);
+    TASK_EMOJIS.forEach(emoji=>emojiSelect.add(new Option(emoji+' '+emojiNames[emoji],emoji, false, emoji===(task.emoji||'📚'))));
+    row.querySelector('.delete-task').before(emojiSelect);
+    emojiSelect.addEventListener('change',()=>{task.emoji=emojiSelect.value;save();});
     row.querySelector('.task-emoji').addEventListener('click', () => { const index=TASK_EMOJIS.indexOf(task.emoji||'📚'); task.emoji=TASK_EMOJIS[(index+1)%TASK_EMOJIS.length]; save(); });
     row.querySelector('input').addEventListener('change', e => { task.done=e.target.checked; const key=dayKey(new Date()); data.week[key]=Math.max(0,(data.week[key]||0)+(task.done?1:-1)); save(); if(task.done)showTaskMotivation(task); });
     row.querySelector('.delete-task').addEventListener('click', () => { data.tasks=data.tasks.filter(item=>item.id!==task.id); save(); }); taskList.append(row);
