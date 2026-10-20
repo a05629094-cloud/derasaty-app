@@ -16,7 +16,7 @@ body { background: #f4eee3 !important; color: #183c36 !important; }
 .main-content { max-width: 980px !important; }
 .card { background: #fbf8f1 !important; border-color: #e8dfd1 !important; box-shadow: 0 5px 20px #49391c0a !important; }
 .topbar h1, .page-heading h2, .section-heading h2 { color: #183c36 !important; }
-.hero, #heroPanel { background: linear-gradient(120deg, #203c37, #354c44) !important; color: #fffaf1 !important; }
+.hero, #heroPanel { background-color: #203c37 !important; color: #fffaf1 !important; }
 .hero h2, .hero p, .hero .hero-tag, #heroPanel h2, #heroPanel p, #heroPanel .hero-tag { color: #fffaf1 !important; }
 .hero p, #heroPanel p { opacity: .88; }
 .hero .button-light, #heroPanel .button-light { background: #f5f0e6 !important; color: #254b40 !important; }

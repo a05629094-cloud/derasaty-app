@@ -5,7 +5,7 @@
 
   const titles = {
     home: 'الرئيسية', subjects: 'المواد الدراسية', tasks: 'المهام',
-    schedule: 'جدول اليوم', progress: 'تقدمي', profile: 'ملفي الشخصي'
+    schedule: 'جدول اليوم', focus: 'جلسة التركيز', progress: 'تقدمي', profile: 'ملفي الشخصي'
   };
   const pages = new Map();
   for (const [key, title] of Object.entries(titles)) {
@@ -24,7 +24,8 @@
   };
   put('header.topbar', 'home');
   put('.hero', 'home');
-  put('#focusTimer', 'home');
+  put('#focusTimer .daily-target', 'progress');
+  put('#focusTimer', 'focus');
   put('.stats-grid', 'home');
   put('#tasks', 'tasks');
   put('#subjects', 'subjects');

@@ -1,0 +1,66 @@
+/* Refined page-by-page layout for the approved warm study planner design. */
+:root{--ink:#183c36!important;--green:#315f50!important;--green-dark:#254b40!important;--cream:#f5f0e6!important;--line:#e8dfd1!important;--white:#fbf8f1!important}
+body,.app-shell{background:#f4eee3!important;color:#183c36!important}
+.main-content{max-width:1180px!important}
+.sidebar{width:245px;background:#fbf8f1!important}
+.nav-link{border-radius:14px!important}
+.nav-link.active,.nav-link:hover{background:#e5ede5!important;color:#254b40!important}
+.app-page{width:100%;min-height:65vh;animation:page-in .18s ease-out}
+.app-page[hidden]{display:none!important}
+.page-heading{margin:2px 0 16px;padding:4px 2px}
+.page-heading h2{margin:0;color:#183a32;font-size:23px;font-weight:800}
+.app-page>#tasks,.app-page>#subjects,.app-page>#schedule,.app-page>#progress,.app-page>#profile,.app-page>#profileSection{display:block;width:100%;margin:0;padding:20px;background:#fbf8f1;border:1px solid #e8dfd1;border-radius:20px;box-shadow:0 5px 20px #49391c0a}
+.app-page>#focusTimer{margin:0}
+.hero,#heroPanel{min-height:220px;border-radius:22px;overflow:hidden;background-size:cover!important;background-position:center!important}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#183a3230,#183a3280);pointer-events:none}
+.hero>div:first-child{position:relative;z-index:1}
+.hero-art{z-index:1;opacity:.9}
+.stats-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+.stat-card,.panel,.subject-card{border-radius:18px!important}
+#subjects .subject-list{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
+#subjects .subject-card{grid-template-columns:42px minmax(0,1fr) auto auto auto!important;gap:10px!important;padding:14px!important}
+#subjects .subject-copy{display:grid!important;gap:3px!important}
+#tasks .task-list{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important}
+#tasks .task-row{grid-template-columns:26px minmax(0,1fr) 86px 36px!important;grid-template-areas:"check copy time delete"!important;align-items:center!important;padding:12px 14px!important;border:1px solid #e8dfd1!important;border-radius:15px!important;background:#fffdf8!important}
+#tasks .task-row .check-task{grid-area:check!important}
+#tasks .task-row .task-copy{grid-area:copy!important}
+#tasks .task-row .task-time{grid-area:time!important}
+#tasks .task-row .delete-task{grid-area:delete!important}
+#profile .profile-overview,#profileSection .profile-overview{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:12px!important}
+#profile .profile-details,#profileSection .profile-details{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+#profile .profile-details>div,#profileSection .profile-details>div{display:flex!important;flex-direction:column!important;gap:5px!important}
+#focusTimer.focus-timer{grid-template-columns:minmax(0,1.2fr) minmax(220px,.8fr)!important;background:#fbf8f1!important;border:1px solid #e8dfd1!important;border-radius:22px!important}
+.daily-target{grid-column:1/-1!important;border:1px solid #e2e8dd!important;border-radius:17px!important;background:#f0f4eb!important;padding:16px!important}
+.daily-target-heading,.daily-target-foot{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:12px!important}
+.daily-target-heading input{width:100px!important;padding:9px!important;border:1px solid #d9e0d4!important;border-radius:10px!important;background:white!important}
+.daily-target-bar{height:9px!important;background:#dce5d8!important;border-radius:9px!important;margin:12px 0!important;overflow:hidden!important}
+.daily-target-bar span{display:block!important;height:100%!important;background:#4f8067!important;border-radius:9px!important}
+.daily-target-foot{font-size:11px!important;color:#587161!important;flex-wrap:wrap!important}
+.flashcard-list{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+.flashcard-item{border:1px solid #e8dfd1!important;border-radius:15px!important;background:#fffdf8!important;padding:14px!important}
+.flashcard-answer{margin:10px 0 0!important;color:#527258!important;line-height:1.8!important}
+.subject-lessons,.subject-cards{border:0!important;border-radius:10px!important;padding:9px 12px!important;background:#e7eee6!important;color:#315f50!important;font:700 11px 'Cairo',Tahoma,sans-serif!important;cursor:pointer!important}
+.feature-dialog{width:min(460px,calc(100% - 28px))!important;max-height:min(82vh,700px)!important;overflow:auto!important;border:1px solid #e8dfd1!important;border-radius:22px!important;background:#fbf8f1!important;color:#183c36!important;padding:23px!important}
+.motivation-dialog,.welcome-dialog{text-align:center!important;padding:34px 26px 26px!important}
+.motivation-close,.welcome-close{position:absolute!important;top:12px!important;left:12px!important}
+@keyframes page-in{from{opacity:.5;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:720px){
+ .app-page{min-height:60vh}
+ .page-heading{margin:0 0 10px}
+ .page-heading h2{font-size:19px}
+ .app-page>#tasks,.app-page>#subjects,.app-page>#schedule,.app-page>#progress,.app-page>#profile,.app-page>#profileSection{padding:14px!important;border-radius:17px!important}
+ .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .hero,#heroPanel{min-height:205px!important;border-radius:19px!important}
+ #subjects .subject-card{grid-template-columns:36px minmax(0,1fr) auto!important;gap:7px!important;padding:11px 9px!important}
+ #subjects .subject-remove{grid-column:3;grid-row:1}
+ #subjects .subject-lessons,#subjects .subject-cards{grid-row:2}
+ #tasks .task-row{grid-template-columns:24px minmax(0,1fr) 33px!important;grid-template-areas:"check copy delete" "check time delete"!important;padding:11px!important}
+ #tasks .task-row .task-time{font-size:10px!important}
+ #focusTimer.focus-timer{grid-template-columns:1fr!important;padding:15px!important}
+ .daily-target-heading,.daily-target-foot{align-items:flex-start!important;flex-direction:column!important}
+ .sidebar nav{justify-content:flex-start!important;overflow-x:auto!important;scrollbar-width:none!important}
+ .sidebar nav::-webkit-scrollbar{display:none}
+ .nav-link{min-width:58px!important;flex:0 0 auto!important}
+ .nav-add{flex:0 0 42px!important}
+}
