@@ -4,8 +4,8 @@
   main.dataset.pagesReady = 'true';
 
   const titles = {
-    home: 'الرئيسية', subjects: 'المواد الدراسية', tasks: 'المهام',
-    schedule: 'جدول اليوم', focus: 'جلسة التركيز', progress: 'تقدمي', profile: 'ملفي الشخصي'
+    home: 'الرئيسية', subjects: 'المواد والدروس', tasks: 'المهام',
+    schedule: 'جدول اليوم', focus: 'جلسة التركيز', progress: 'تقدمي وبطاقات المراجعة', profile: 'ملفي الشخصي'
   };
   const pages = new Map();
   for (const [key, title] of Object.entries(titles)) {
@@ -13,7 +13,7 @@
     page.className = 'app-page';
     page.dataset.appPage = key;
     page.hidden = true;
-    page.innerHTML = `<header class="page-heading"><p class="eyebrow">مساحتك الدراسية</p><h2>${title}</h2></header>`;
+    page.innerHTML = `<header class="page-heading"><div><p class="eyebrow">مساحتك الدراسية</p><h2>${title}</h2></div><button class="page-heading-avatar" type="button" aria-label="الملف الشخصي"><span>ط</span></button></header>`;
     main.append(page);
     pages.set(key, page);
   }
