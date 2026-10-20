@@ -25,7 +25,7 @@
   put('header.topbar', 'home');
   put('.hero', 'home');
   put('.quick-shortcuts', 'home');
-  put('#focusTimer .daily-target', 'progress');
+  put('#focusTimer .daily-target', 'home');
   put('#focusTimer', 'focus');
   put('.stats-grid', 'home');
   put('#tasks', 'tasks');
@@ -57,11 +57,14 @@
     new MutationObserver(copyTasks).observe(taskSource,{childList:true,subtree:true,characterData:true,attributes:true});
     const hero = homePage.querySelector('#heroPanel');
     const stats = homePage.querySelector('.stats-grid');
+    const target = homePage.querySelector('.daily-target');
     const shortcuts = homePage.querySelector('.quick-shortcuts');
     if (hero && shortcuts) hero.after(shortcuts);
     if (shortcuts && stats) shortcuts.after(stats);
+    if (stats && target) stats.after(target);
     const anchor = stats || shortcuts || hero;
     if (anchor) anchor.after(preview); else homePage.append(preview);
+    if (target) preview.after(target);
   }
 
   const weekSource = main.querySelector('#weekDays');
