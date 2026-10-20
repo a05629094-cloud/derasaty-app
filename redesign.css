@@ -64,3 +64,40 @@ body,.app-shell{background:#f4eee3!important;color:#183c36!important}
  .nav-link{min-width:58px!important;flex:0 0 auto!important}
  .nav-add{flex:0 0 42px!important}
 }
+
+/* Highly visible home redesign: use the illustrated study desk scenes as the hero artwork. */
+#heroPanel.hero{
+  position:relative!important;isolation:isolate!important;min-height:275px!important;
+  display:flex!important;align-items:center!important;padding:32px 38px!important;
+  overflow:hidden!important;border:1px solid #dfc9a7!important;border-radius:26px!important;
+  background-color:#214c40!important;
+  background-image:linear-gradient(270deg,#163d35 0%,#163d35ed 27%,#163d35a8 56%,#163d3520 100%),url("./study-scene-1.svg")!important;
+  background-position:center,center 57%!important;background-size:cover,cover!important;
+  box-shadow:0 16px 38px #213d3029!important
+}
+#heroPanel.hero[data-scene="0"]{background-image:linear-gradient(270deg,#163d35 0%,#163d35ed 27%,#163d35a8 56%,#163d3520 100%),url("./study-scene-1.svg")!important}
+#heroPanel.hero[data-scene="1"]{background-image:linear-gradient(270deg,#49352e 0%,#49352eed 27%,#49352ea8 56%,#49352e20 100%),url("./study-scene-2.svg")!important}
+#heroPanel.hero[data-scene="2"]{background-image:linear-gradient(270deg,#1d344c 0%,#1d344ced 27%,#1d344ca8 56%,#1d344c20 100%),url("./study-scene-3.svg")!important}
+#heroPanel.hero[data-scene="3"]{background-image:linear-gradient(270deg,#49394b 0%,#49394bed 27%,#49394ba8 56%,#49394b20 100%),url("./study-scene-4.svg")!important}
+#heroPanel.hero:before,#heroPanel.hero:after{content:none!important;display:none!important}
+#heroPanel .hero-art{display:none!important}
+#heroPanel>div:first-child{max-width:560px!important}
+#heroPanel .hero-tag{display:inline-flex!important;align-items:center!important;gap:7px!important;padding:7px 12px!important;border:1px solid #ffffff35!important;border-radius:99px!important;background:#ffffff1c!important;color:#ffe4ad!important;font-size:12px!important}
+#heroPanel h2{max-width:540px!important;font-size:clamp(25px,3vw,36px)!important;line-height:1.45!important;color:#fffaf1!important}
+#heroPanel p{max-width:450px!important;font-size:13px!important;line-height:1.9!important;color:#fffaf1!important}
+#heroPanel .button-light{min-height:44px!important;border-radius:14px!important;padding-inline:18px!important;font-size:12px!important;box-shadow:0 6px 18px #102c2340!important}
+.main-content{max-width:1240px!important}
+.stat-card.card,.panel.card,.profile-section.card{border:1px solid #e4dac8!important;border-radius:22px!important;background:linear-gradient(145deg,#fffdf8,#f8f2e7)!important;box-shadow:0 9px 26px #49391c10!important}
+.stat-card.card{min-height:94px!important;padding:16px!important}
+.stat-icon{border-radius:15px!important}
+.section-heading{margin-bottom:16px!important}
+.section-heading h2{font-size:17px!important}
+.nav-link.active{font-weight:800!important}
+@media(max-width:720px){
+ #heroPanel.hero{min-height:255px!important;padding:21px 18px!important;border-radius:21px!important;background-position:center,42% center!important}
+ #heroPanel>div:first-child{max-width:78%!important}
+ #heroPanel h2{font-size:23px!important}
+ #heroPanel p{font-size:11px!important}
+ .stat-card.card{min-height:82px!important;padding:11px!important}
+ .stat-icon{border-radius:12px!important}
+}
