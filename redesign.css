@@ -209,3 +209,62 @@ body,.app-shell{background:#f4eee3!important;color:#183c36!important}
  .calendar-weekdays{font-size:8px;gap:2px}
  .calendar-day{height:36px;font-size:12px}
 }
+
+
+/* Layout pass aligned to the supplied all-pages reference. */
+.app-page[data-app-page="home"]{display:grid!important;grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr)!important;gap:14px!important;align-content:start!important}
+.app-page[data-app-page="home"][hidden]{display:none!important}
+.app-page[data-app-page="home"]>.page-heading{display:none!important}
+.app-page[data-app-page="home"]>.topbar,
+.app-page[data-app-page="home"]>#heroPanel,
+.app-page[data-app-page="home"]>.stats-grid,
+.app-page[data-app-page="home"]>.quick-shortcuts,
+.app-page[data-app-page="home"]>footer{grid-column:1/-1!important}
+.app-page[data-app-page="home"]>.quick-shortcuts{display:none!important}
+.app-page[data-app-page="home"]>.home-today{grid-column:1!important;grid-row:auto!important;min-width:0!important}
+.app-page[data-app-page="home"]>.home-week{grid-column:2!important;grid-row:auto!important;min-width:0!important}
+.app-page[data-app-page="home"]>.stats-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.app-page[data-app-page="home"]>.stats-grid>.stat-card:nth-child(4){display:none!important}
+#heroPanel.hero{background-image:linear-gradient(110deg,#183a35,#326252)!important;background-color:#214c40!important;border:0!important;min-height:155px!important;padding:25px 29px!important}
+#heroPanel .hero-art{display:grid!important;place-items:center!important;width:110px!important;min-width:110px!important;height:105px!important;opacity:1!important}
+#heroPanel .hero-art>*{display:none!important}
+#heroPanel .hero-art:before{content:"📚";font-size:68px;filter:drop-shadow(0 7px 8px #102c2340)}
+.home-today,.home-week{height:100%!important;min-height:220px!important;margin:0!important;padding:17px!important}
+.home-today .task-row{grid-template-columns:26px minmax(0,1fr) 36px!important;grid-template-areas:"check copy delete" "check time delete"!important;min-height:62px!important}
+.home-week .home-week-days{grid-template-columns:repeat(7,minmax(0,1fr))!important}
+.home-week .section-heading h2{font-size:16px!important}
+#subjects .subject-list{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+#subjects .subject-card{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:10px!important;padding:14px!important}
+#subjects .subject-mark{flex:0 0 42px!important}
+#subjects .subject-copy{flex:1 1 170px!important;min-width:0!important}
+#subjects .inline-subject-lessons{display:grid!important;flex:1 0 100%!important;gap:7px!important;padding-top:9px!important;border-top:1px solid #eee9df!important}
+#subjects .inline-subject-lesson{display:grid!important;grid-template-columns:20px minmax(0,1fr) auto!important;align-items:center!important;gap:9px!important;min-height:38px!important;padding:5px 2px!important;color:#203a35!important;font-size:12px!important}
+#subjects .inline-subject-lesson input{width:18px!important;height:18px!important;accent-color:#315f50!important}
+#subjects .inline-subject-lesson small{color:#81877e!important;font-size:10px!important}
+#subjects .inline-subject-empty{color:#81877e!important;font-size:11px!important;line-height:1.8!important}
+.task-filters{display:flex!important;gap:8px!important;flex-wrap:wrap!important;margin:0 0 13px!important}
+.task-filter{border:1px solid #e7e0d3!important;border-radius:22px!important;padding:8px 13px!important;background:#fffdf8!important;color:#607068!important;font:inherit!important;font-size:12px!important;cursor:pointer!important}
+.task-filter.active{background:#28584c!important;border-color:#28584c!important;color:white!important}
+#tasks .task-row.task-filter-hidden{display:none!important}
+#tasks .task-row{min-height:62px!important}
+#schedule .schedule-row{display:grid!important;grid-template-columns:60px 12px minmax(0,1fr)!important;align-items:center!important;gap:10px!important;min-height:58px!important;margin:8px 0!important;padding:9px 12px!important;border:1px solid #e7e0d3!important;border-radius:14px!important;background:#fffdf8!important}
+#profile .profile-overview,#profileSection .profile-overview{display:flex!important;flex-direction:row!important;align-items:center!important;padding:17px!important;border:1px solid #e7e0d3!important;border-radius:18px!important;background:#fffdf8!important}
+#profile .profile-avatar-large,#profileSection .profile-avatar-large{flex:0 0 76px!important}
+#profile .profile-details,#profileSection .profile-details{grid-template-columns:1fr!important}
+#profile .profile-details>div,#profileSection .profile-details>div{padding:13px!important;border:1px solid #e7e0d3!important;border-radius:13px!important;background:#fffdf8!important}
+@media(max-width:720px){
+ .app-page[data-app-page="home"]{display:flex!important;flex-direction:column!important;gap:10px!important}
+ .app-page[data-app-page="home"]>.topbar,.app-page[data-app-page="home"]>#heroPanel,.app-page[data-app-page="home"]>.stats-grid,.app-page[data-app-page="home"]>.home-today,.app-page[data-app-page="home"]>.home-week{width:100%!important}
+ .app-page[data-app-page="home"]>.stats-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .app-page[data-app-page="home"]>.stats-grid>.stat-card:nth-child(4){display:none!important}
+ .app-page[data-app-page="home"]>.home-today,.app-page[data-app-page="home"]>.home-week{min-height:0!important}
+ #heroPanel.hero{min-height:155px!important;padding:18px 15px!important}
+ #heroPanel>div:first-child{max-width:72%!important}
+ #heroPanel .hero-art{width:72px!important;min-width:72px!important;height:74px!important}
+ #heroPanel .hero-art:before{font-size:46px}
+ #subjects .subject-card{gap:7px!important;padding:11px!important}
+ #subjects .inline-subject-lesson{grid-template-columns:20px minmax(0,1fr) auto!important}
+ #profile .profile-overview,#profileSection .profile-overview{align-items:flex-start!important}
+ #profile .profile-avatar-large,#profileSection .profile-avatar-large{flex-basis:62px!important;width:62px!important;height:62px!important}
+ #schedule .schedule-row{grid-template-columns:52px 10px minmax(0,1fr)!important;padding:8px!important}
+}
