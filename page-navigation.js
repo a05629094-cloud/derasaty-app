@@ -56,7 +56,12 @@
     copyTasks();
     new MutationObserver(copyTasks).observe(taskSource,{childList:true,subtree:true,characterData:true,attributes:true});
     const hero = homePage.querySelector('#heroPanel');
-    if (hero) hero.after(preview); else homePage.append(preview);
+    const stats = homePage.querySelector('.stats-grid');
+    const shortcuts = homePage.querySelector('.quick-shortcuts');
+    if (hero && shortcuts) hero.after(shortcuts);
+    if (shortcuts && stats) shortcuts.after(stats);
+    const anchor = stats || shortcuts || hero;
+    if (anchor) anchor.after(preview); else homePage.append(preview);
   }
 
   const weekSource = main.querySelector('#weekDays');
@@ -69,7 +74,8 @@
     copyWeek();
     new MutationObserver(copyWeek).observe(weekSource,{childList:true,subtree:true,characterData:true,attributes:true});
     const preview = homePage.querySelector('.home-today');
-    (preview || homePage.querySelector('.hero') || homePage).after(week);
+    const anchor = preview || homePage.querySelector('.stats-grid') || homePage.querySelector('.hero');
+    if (anchor) anchor.after(week); else homePage.append(week);
   }
 
   main.querySelectorAll('.content-grid,.bottom-grid').forEach(wrapper => {
