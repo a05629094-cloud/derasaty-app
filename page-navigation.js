@@ -36,6 +36,41 @@
 
   // Keep the app footer on the home screen and remove now-empty layout wrappers.
   put('footer', 'home');
+  const homePage = pages.get('home');
+  const taskSource = main.querySelector('#taskList');
+  if (taskSource) {
+    const preview = document.createElement('section');
+    preview.className = 'home-today card';
+    preview.innerHTML = '<div class="section-heading"><div><p class="eyebrow">خطواتك القادمة</p><h2>مهام اليوم</h2></div><a class="text-button" href="#tasks" data-view="tasks">عرض الكل ‹</a></div><div class="home-task-preview"></div>';
+    const previewList = preview.querySelector('.home-task-preview');
+    const copyTasks = () => {
+      previewList.replaceChildren(...Array.from(taskSource.querySelectorAll(':scope > .task-row')).slice(0,3).map(row => {
+        const copy = row.cloneNode(true);
+        copy.removeAttribute('id');
+        copy.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
+        copy.querySelectorAll('button,input').forEach(node => { node.disabled = true; node.tabIndex = -1; });
+        return copy;
+      }));
+    };
+    copyTasks();
+    new MutationObserver(copyTasks).observe(taskSource,{childList:true,subtree:true,characterData:true,attributes:true});
+    const hero = homePage.querySelector('#heroPanel');
+    if (hero) hero.after(preview); else homePage.append(preview);
+  }
+
+  const weekSource = main.querySelector('#weekDays');
+  if (weekSource) {
+    const week = document.createElement('section');
+    week.className = 'home-week card';
+    week.innerHTML = '<div class="section-heading"><div><p class="eyebrow">خطّط لأيامك</p><h2>جدولك الأسبوعي</h2></div><a class="text-button" href="#schedule" data-view="schedule">التقويم ‹</a></div><div class="home-week-days"></div>';
+    const weekCopy = week.querySelector('.home-week-days');
+    const copyWeek = () => weekCopy.replaceChildren(...Array.from(weekSource.children).map(day=>day.cloneNode(true)));
+    copyWeek();
+    new MutationObserver(copyWeek).observe(weekSource,{childList:true,subtree:true,characterData:true,attributes:true});
+    const preview = homePage.querySelector('.home-today');
+    (preview || homePage.querySelector('.hero') || homePage).after(week);
+  }
+
   main.querySelectorAll('.content-grid,.bottom-grid').forEach(wrapper => {
     if (!wrapper.querySelector('#tasks,#subjects,#schedule,#progress')) wrapper.remove();
   });
