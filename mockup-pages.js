@@ -71,4 +71,75 @@
     addMeters();
     new MutationObserver(addMeters).observe(subjectList,{childList:true,subtree:true});
   }
+
+  // Add the reference's task status chips while leaving task records in app.js intact.
+  const taskSection=document.getElementById('tasks');
+  const taskList=document.getElementById('taskList');
+  if(taskSection&&taskList){
+    const filters=document.createElement('div');
+    filters.className='task-filters';
+    filters.setAttribute('aria-label','تصفية المهام');
+    filters.innerHTML='<button type="button" class="task-filter active" data-filter="all">الكل</button><button type="button" class="task-filter" data-filter="open">قيد الدراسة</button><button type="button" class="task-filter" data-filter="done">مكتملة</button>';
+    taskList.before(filters);
+    let filterMode='all';
+    const applyTaskFilter=()=>{
+      taskList.querySelectorAll(':scope > .task-row').forEach(row=>{
+        const isDone=row.classList.contains('done');
+        row.classList.toggle('task-filter-hidden',filterMode==='done'&&!isDone||filterMode==='open'&&isDone);
+      });
+    };
+    filters.addEventListener('click',event=>{
+      const button=event.target.closest('[data-filter]');
+      if(!button)return;
+      filterMode=button.dataset.filter;
+      filters.querySelectorAll('.task-filter').forEach(item=>item.classList.toggle('active',item===button));
+      applyTaskFilter();
+    });
+    new MutationObserver(applyTaskFilter).observe(taskList,{childList:true,subtree:true});
+    applyTaskFilter();
+  }
+
+  // Show each student's lesson checklist directly inside its subject card.
+  const decorateLessons=()=>{
+    try{
+      const list=document.getElementById('subjectList');
+      if(!list||!Array.isArray(data.subjects))return;
+      [...list.querySelectorAll(':scope > .subject-card')].forEach((card,index)=>{
+        const subject=data.subjects[index];
+        if(!subject)return;
+        const lessons=Array.isArray(subject.lessons)?subject.lessons:[];
+        if(card.dataset.inlineLessonCount===String(lessons.length)&&card.querySelector('.inline-subject-lessons'))return;
+        card.querySelector('.inline-subject-lessons')?.remove();
+        const wrap=document.createElement('div');
+        wrap.className='inline-subject-lessons';
+        wrap.dataset.inlineLessonCount=String(lessons.length);
+        if(!lessons.length){
+          const note=document.createElement('span');
+          note.className='inline-subject-empty';
+          note.textContent='اكتب أسماء دروس المادة، وعلّم على كل درس بعد الانتهاء.';
+          wrap.append(note);
+        }else lessons.forEach((lesson,lessonIndex)=>{
+          const row=document.createElement('label');
+          row.className='inline-subject-lesson';
+          const check=document.createElement('input');
+          check.type='checkbox';check.checked=Boolean(lesson.done);
+          check.setAttribute('aria-label','إنجاز '+lesson.name);
+          const name=document.createElement('span');name.textContent=lesson.name;
+          const status=document.createElement('small');status.textContent=lesson.done?'مكتمل':'لم يكتمل';
+          check.addEventListener('change',()=>{
+            const current=data.subjects.find(item=>item.id===subject.id);
+            if(!current||!current.lessons?.[lessonIndex])return;
+            current.lessons[lessonIndex].done=check.checked;
+            save();
+          });
+          row.append(check,name,status);wrap.append(row);
+        });
+        const buttons=card.querySelector('.subject-cards,.subject-lessons,.subject-remove');
+        card.insertBefore(wrap,buttons||null);
+        card.dataset.inlineLessonCount=String(lessons.length);
+      });
+    }catch(error){console.warn('تعذر عرض قائمة الدروس داخل المواد',error);}
+  };
+  decorateLessons();
+  if(subjectList)new MutationObserver(decorateLessons).observe(subjectList,{childList:true,subtree:true});
 })();
