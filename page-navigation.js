@@ -24,6 +24,7 @@
   };
   put('header.topbar', 'home');
   put('.hero', 'home');
+  put('.quick-shortcuts', 'home');
   put('#focusTimer .daily-target', 'progress');
   put('#focusTimer', 'focus');
   put('.stats-grid', 'home');
