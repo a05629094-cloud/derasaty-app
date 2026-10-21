@@ -22,9 +22,11 @@ const seed = {
   week: {},
   profile: {name:'طالب دراستي', stage:'', school:''}
 };
+const cloneData = value => JSON.parse(JSON.stringify(value));
+const makeId = () => (window.crypto && typeof window.crypto['randomUUID'] === 'function') ? window.crypto['randomUUID']() : `id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 let data;
-try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || structuredClone(seed); }
-catch { data = structuredClone(seed); }
+try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || cloneData(seed); }
+catch { data = cloneData(seed); }
 data.focusLog = Array.isArray(data.focusLog) ? data.focusLog : [];
 data.week = data.week && typeof data.week === 'object' ? data.week : {};
 data.dailyGoalMinutes = Number(data.dailyGoalMinutes) || 60;
@@ -251,7 +253,7 @@ function finishFocusPhase() {
   focusTimerId = null;
   if (focusMode === 'study') {
     data.focusLog.push({
-      id: crypto.randomUUID(),
+      id: makeId(),
       minutes: 25,
       subject: $('#focusSubject').value,
       task: $('#focusTask').value,
@@ -324,7 +326,7 @@ function ensureFeatureUi() {
     const answer = $('#flashcardAnswer').value.trim();
     if (!subject || !question || !answer) return;
     subject.flashcards = Array.isArray(subject.flashcards) ? subject.flashcards : [];
-    subject.flashcards.push({ id: crypto.randomUUID(), question, answer });
+    subject.flashcards.push({ id: makeId(), question, answer });
     $('#flashcardQuestion').value = '';
     $('#flashcardAnswer').value = '';
     save();
@@ -343,7 +345,7 @@ function ensureFeatureUi() {
     const subject = data.subjects.find(item => item.id === activeLessonSubjectId);
     if (!name || !subject) return;
     subject.lessons = Array.isArray(subject.lessons) ? subject.lessons : [];
-    subject.lessons.push({ id: crypto.randomUUID(), name, done: false });
+    subject.lessons.push({ id: makeId(), name, done: false });
     $('#lessonNameInput').value = '';
     save();
     renderLessonList();
@@ -466,9 +468,9 @@ function openForm(nextMode){mode=nextMode;$('#entryForm').reset();$('#entryTime'
   dialog.showModal();$('#entryName').focus();
 }
 $('#entryForm').addEventListener('submit',event=>{event.preventDefault();const name=$('#entryName').value.trim();if(!name)return;
-  if(mode==='task') data.tasks.push({id:crypto.randomUUID(),name,subject:$('#entrySubject').value,time:'',done:false,emoji:taskEmojiSelect.value||'📚'});
-  if(mode==='subject') data.subjects.push({id:crypto.randomUUID(),name,icon:'✦',color:['#eee8f7','#f9eee1','#e7f1eb','#e8eef7'][data.subjects.length%4],detail:'مادة دراسية'});
-  if(mode==='session'){const raw=$('#entryTime').value;const [h,m]=raw.split(':').map(Number);const suffix=h>=12?'م':'ص';const hour=((h+11)%12)+1;data.sessions.push({id:crypto.randomUUID(),name,time:`${String(hour).padStart(2,'0')}:${String(m).padStart(2,'0')} ${suffix}`,title:name,duration:$('#entryDuration').value,subject:$('#entrySubject').value});}
+  if(mode==='task') data.tasks.push({id:makeId(),name,subject:$('#entrySubject').value,time:'',done:false,emoji:taskEmojiSelect.value||'📚'});
+  if(mode==='subject') data.subjects.push({id:makeId(),name,icon:'✦',color:['#eee8f7','#f9eee1','#e7f1eb','#e8eef7'][data.subjects.length%4],detail:'مادة دراسية'});
+  if(mode==='session'){const raw=$('#entryTime').value;const [h,m]=raw.split(':').map(Number);const suffix=h>=12?'م':'ص';const hour=((h+11)%12)+1;data.sessions.push({id:makeId(),name,time:`${String(hour).padStart(2,'0')}:${String(m).padStart(2,'0')} ${suffix}`,title:name,duration:$('#entryDuration').value,subject:$('#entrySubject').value});}
   dialog.close();save();showToast('تمت الإضافة بنجاح ✨');
 });
 $('#addTask').addEventListener('click',()=>openForm('task'));$('#quickAdd').addEventListener('click',()=>openForm('task'));$('#addSubject').addEventListener('click',()=>openForm('subject'));$('#addSession').addEventListener('click',()=>openForm('session'));
@@ -488,8 +490,8 @@ async function loadCloudData(){
   $('#syncStatus').textContent='جارٍ تحميل بيانات حسابك…';
   const {data:row,error}=await cloud.from('user_data').select('data').eq('user_id',currentUser.id).maybeSingle();
   if(error){$('#syncStatus').textContent='تعذّر تحميل المزامنة. راجع إعداد قاعدة البيانات.';return;}
-  if(row?.data){data={...structuredClone(seed),...row.data};localStorage.setItem(STORAGE_KEY,JSON.stringify(data));render();$('#syncStatus').textContent='تم تحميل بياناتك ومزامنتها.';}
-  else { data.profile=structuredClone(seed.profile); render(); await syncNow(); }
+  if(row?.data){data={...cloneData(seed),...row.data};localStorage.setItem(STORAGE_KEY,JSON.stringify(data));render();$('#syncStatus').textContent='تم تحميل بياناتك ومزامنتها.';}
+  else { data.profile=cloneData(seed.profile); render(); await syncNow(); }
 }
 function scheduleCloudSave(){if(!cloud||!currentUser)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(syncNow,650);}
 async function syncNow(){
