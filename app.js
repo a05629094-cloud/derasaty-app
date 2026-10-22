@@ -627,4 +627,5 @@ initializeAccount();
 render();
 chooseHeroScene();
 $('#welcomeDialog').showModal();
+setTimeout(()=>{const dialog=$('#welcomeDialog');if(dialog?.open)dialog.close();},8000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')chooseHeroScene();});
