@@ -32,8 +32,14 @@ data.week = data.week && typeof data.week === 'object' ? data.week : {};
 data.dailyGoalMinutes = Number(data.dailyGoalMinutes) || 60;
 data.subjects.forEach(subject => { subject.lessons = Array.isArray(subject.lessons) ? subject.lessons : []; subject.flashcards = Array.isArray(subject.flashcards) ? subject.flashcards : []; });
 const cloudConfig = window.DARASTY_SUPABASE || {};
-const cloudReady = Boolean(cloudConfig.url && cloudConfig.publishableKey && window.supabase?.createClient);
-const cloud = cloudReady ? window.supabase.createClient(cloudConfig.url, cloudConfig.publishableKey) : null;
+let cloudReady = false;
+let cloud = null;
+function initializeCloudClient(){
+  cloudReady=Boolean(cloudConfig.url&&cloudConfig.publishableKey&&window.supabase?.createClient);
+  cloud=cloudReady?window.supabase.createClient(cloudConfig.url,cloudConfig.publishableKey):null;
+  return cloudReady;
+}
+initializeCloudClient();
 let currentUser = null;
 let cloudTimer;
 const $ = (selector) => document.querySelector(selector);
@@ -502,7 +508,10 @@ async function syncNow(){
 }
 async function initializeAccount(){
   updateAccountUi();
-  if(!cloud)return;
+  if(!cloud){
+    window.addEventListener('derasaty-supabase-ready',()=>{if(initializeCloudClient())initializeAccount();},{once:true});
+    return;
+  }
   const {data:sessionData}=await cloud.auth.getSession();
   currentUser=sessionData.session?.user||null;updateAccountUi();
   if(currentUser)loadCloudData();
